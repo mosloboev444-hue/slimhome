@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SlimHome — лаунчер для Android TV</title>
+<meta name="description" content="Лёгкий лаунчер для ТВ-приставок: сетка приложений, погода, подсветка под цвет иконки. 35 КБ, без рекламы и аккаунтов.">
+<meta property="og:title" content="SlimHome — лаунчер для Android TV">
+<meta property="og:description" content="Сетка приложений, погода, подсветка. 35 КБ, без рекламы.">
+<meta property="og:image" content="img/social-preview.png">
+<style>
+  :root { --bg:#0a0e16; --card:#141c2b; --text:#eef3fb; --dim:#9fb0c9; --accent:#6ed6ff; --accent2:#c49bff; }
+  * { box-sizing:border-box; }
+  body { margin:0; background:var(--bg); color:var(--text);
+         font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif; line-height:1.55; }
+  .wrap { max-width:1040px; margin:0 auto; padding:32px 20px 64px; }
+  header { display:flex; align-items:center; gap:16px; flex-wrap:wrap; }
+  .logo { width:56px; height:56px; border-radius:14px; background:#fff; color:#101725;
+          font-weight:800; font-size:28px; display:flex; align-items:center; justify-content:center; }
+  h1 { font-size:34px; margin:0; letter-spacing:-0.5px; }
+  .sub { color:var(--dim); margin:6px 0 26px; font-size:17px; }
+  .cta { display:flex; gap:12px; flex-wrap:wrap; margin:26px 0 34px; }
+  .btn { display:inline-block; padding:14px 22px; border-radius:12px; text-decoration:none; font-weight:600; }
+  .btn-primary { background:linear-gradient(135deg,var(--accent),var(--accent2)); color:#08111c; }
+  .btn-ghost { border:1px solid #2a3950; color:var(--text); }
+  img.shot { width:100%; border-radius:16px; border:1px solid #1e2a3d; display:block; }
+  .grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(280px,1fr)); gap:16px; margin:26px 0; }
+  .card { background:var(--card); border:1px solid #1e2a3d; border-radius:14px; padding:18px; }
+  .card h3 { margin:0 0 8px; font-size:16px; }
+  .card p { margin:0; color:var(--dim); font-size:14px; }
+  h2 { margin-top:44px; font-size:22px; }
+  code { background:#111a28; padding:2px 6px; border-radius:6px; font-size:13px; }
+  pre { background:#111a28; padding:16px; border-radius:12px; overflow:auto; }
+  footer { margin-top:52px; color:var(--dim); font-size:14px; border-top:1px solid #1e2a3d; padding-top:20px; }
+  a { color:var(--accent); }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="logo">S</div>
+    <div>
+      <h1>SlimHome</h1>
+      <div class="sub">Лаунчер для Android TV · 35 КБ · без рекламы и аккаунтов</div>
+    </div>
+  </header>
+
+  <div class="cta">
+    <a class="btn btn-primary" href="https://github.com/mosloboev444-hue/slimhome/releases/download/v1.0/SlimHome-1.0.apk">Скачать APK</a>
+    <a class="btn btn-ghost" href="https://github.com/mosloboev444-hue/slimhome">Исходники на GitHub</a>
+  </div>
+
+  <img class="shot" src="img/github/01-home.png" alt="Главный экран SlimHome">
+
+  <div class="grid">
+    <div class="card"><h3>Плитки приложений</h3><p>3–5 колонок под экран, рамка по контенту, ровные отступы и фокус с подсветкой.</p></div>
+    <div class="card"><h3>Погода сама себя находит</h3><p>Город по IP, прогноз на дни вперёд. Без ключей API и разрешений на геолокацию.</p></div>
+    <div class="card"><h3>Фон под цвет иконки</h3><p>При выборе приложения фон плавно перекрашивается в его фирменный цвет.</p></div>
+    <div class="card"><h3>Работает на старых ТВ</h3><p>Проверено на 1920×1080 и на 720×576 через «тюльпаны»: ничего не обрезается.</p></div>
+  </div>
+
+  <h2>Установка</h2>
+  <pre><code>adb install -r SlimHome-1.0.apk
+adb shell cmd package set-home-activity --user 0 com.slimhome.launcher/.MainActivity</code></pre>
+  <p>Требования: Android TV 8.0+ (API 26), ARM. Вернуть прежний лаунчер можно той же командой с пакетом старого лаунчера.</p>
+
+  <h2>Скриншоты</h2>
+  <div class="grid">
+    <img class="shot" src="img/github/02-all-apps.png" alt="Все приложения">
+    <img class="shot" src="img/github/03-ambient.png" alt="Подсветка фона">
+    <img class="shot" src="img/github/04-lowres-576i.png" alt="Режим 576i">
+  </div>
+
+  <footer>
+    © 2026 Andrey Masloboev · <a href="https://github.com/mosloboev444-hue/slimhome/blob/main/LICENSE">MIT</a> ·
+    <a href="https://github.com/mosloboev444-hue/slimhome">GitHub</a>
+  </footer>
+</div>
+</body>
+</html>

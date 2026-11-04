@@ -1,10 +1,30 @@
 # SlimHome — лаунчер для Android TV
 
+[![License: MIT](https://img.shields.io/badge/license-MIT-2ea44f)](LICENSE)
+[![APK](https://img.shields.io/badge/APK-35%20KB-0aa1dd)](https://github.com/mosloboev444-hue/slimhome/releases/latest)
+[![Android TV](https://img.shields.io/badge/Android%20TV-8.0%2B-3ddc84)](https://developer.android.com/tv)
+[![No Ads](https://img.shields.io/badge/ads-none-critical)](https://github.com/mosloboev444-hue/slimhome)
+
 Лёгкий лаунчер для ТВ-приставок: сетка приложений, погода по геолокации, подсветка фона под цвет иконки,
 кнопки быстрого доступа и своя заставка при загрузке. Написан на Java без сторонних библиотек — **35 КБ APK**,
 без рекламы, аналитики и аккаунтов.
 
-![Главный экран](screenshots/01-home.png)
+![Демонстрация](docs/img/demo.gif)
+
+## Скачать
+
+**[SlimHome-1.0.apk](https://github.com/mosloboev444-hue/slimhome/releases/download/v1.0/SlimHome-1.0.apk)** · Android TV 8.0+ · ARM
+
+```bash
+adb install -r SlimHome-1.0.apk
+adb shell cmd package set-home-activity --user 0 com.slimhome.launcher/.MainActivity
+```
+
+Вернуть прежний лаунчер:
+
+```bash
+adb shell cmd package set-home-activity --user 0 <пакет.старый/активити>
+```
 
 ## Возможности
 
@@ -23,28 +43,10 @@
 
 | Экран | Скриншот |
 |---|---|
+| Главный экран | ![](screenshots/01-home.png) |
 | Все приложения | ![](screenshots/02-all-apps.png) |
 | Подсветка под цвет иконки | ![](screenshots/03-ambient.png) |
-| Подпись и анимация | ![](screenshots/05-signature.png) |
 | Режим 576i (старый ТВ) | ![](screenshots/04-lowres-576i.png) |
-
-## Установка
-
-1. Скачайте `release/SlimHome-1.0.apk`.
-2. Включите на приставке отладку по USB и установите:
-
-```bash
-adb install -r SlimHome-1.0.apk
-adb shell cmd package set-home-activity --user 0 com.slimhome.launcher/.MainActivity
-```
-
-3. Кнопка Home откроет SlimHome. Вернуть прежний лаунчер:
-
-```bash
-adb shell cmd package set-home-activity --user 0 <пакет.старый/активити>
-```
-
-Требования: Android TV 8.0+ (API 26), ARM.
 
 ## Сборка
 
@@ -65,7 +67,8 @@ app/src/main/java/com/slimhome/launcher/
   IntroView.java      — интро при холодном старте
   FaceView.java       — рисованный смайлик-пасхалка
 extras/bootanim/      — заставка для Amlogic (bootvideo) и init-скрипт сетевого ADB
-docs/                 — видео-демонстрации
+docs/                 — видео-демонстрации и материалы
+store/                — тексты и ассеты для публикации в магазинах приложений
 ```
 
 ## Демо
