@@ -1,334 +1,91 @@
-<?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/root"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:background="@drawable/bg_home">
+﻿<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android" android:id="@+id/root" android:layout_width="match_parent" android:layout_height="match_parent" android:background="@drawable/bg_home">
 
     <!-- подсветка фона цветом выбранного приложения -->
-    <View
-        android:id="@+id/tintA"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:alpha="0" />
+    <View android:id="@+id/tintA" android:layout_width="match_parent" android:layout_height="match_parent" android:alpha="0" />
 
-    <View
-        android:id="@+id/tintB"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:alpha="0" />
+    <View android:id="@+id/tintB" android:layout_width="match_parent" android:layout_height="match_parent" android:alpha="0" />
 
     <!-- левый верх: логотип, приветствие, вход в полный список -->
-    <LinearLayout
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="top|start"
-        android:layout_marginTop="44dp"
-        android:layout_marginStart="56dp"
-        android:orientation="horizontal"
-        android:gravity="center_vertical">
+    <LinearLayout android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_gravity="top|start" android:layout_marginTop="44dp" android:layout_marginStart="56dp" android:orientation="horizontal" android:gravity="center_vertical">
 
-        <TextView
-            android:layout_width="48dp"
-            android:layout_height="48dp"
-            android:background="@drawable/logo_bg"
-            android:gravity="center"
-            android:text="S"
-            android:textColor="#FF101725"
-            android:textSize="27sp"
-            android:textStyle="bold" />
+        <TextView android:layout_width="48dp" android:layout_height="48dp" android:background="@drawable/logo_bg" android:gravity="center" android:text="S" android:textColor="#FF101725" android:textSize="27sp" android:textStyle="bold" />
 
-        <LinearLayout
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="16dp"
-            android:orientation="vertical">
+        <LinearLayout android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginStart="16dp" android:orientation="vertical">
 
-            <TextView
-                android:id="@+id/tvGreeting"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Доброй ночи"
-                android:textColor="#E6FFFFFF"
-                android:textSize="21sp" />
+            <TextView android:id="@+id/tvGreeting" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Доброй ночи" android:textColor="#E6FFFFFF" android:textSize="21sp" />
 
-            <TextView
-                android:id="@+id/tvAllApps"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="6dp"
-                android:background="@drawable/pill_bg"
-                android:minHeight="48dp"
-                android:gravity="center"
-                android:focusable="true"
-                android:focusableInTouchMode="true"
-                android:clickable="true"
-                android:paddingStart="20dp"
-                android:paddingEnd="20dp"
-                android:paddingTop="12dp"
-                android:paddingBottom="12dp"
-                android:text="Все приложения"
-                android:textColor="#CCFFFFFF"
-                android:textSize="17sp" />
+            <TextView android:id="@+id/tvAllApps" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="6dp" android:background="@drawable/pill_bg" android:minHeight="48dp" android:gravity="center" android:focusable="true" android:focusableInTouchMode="true" android:clickable="true" android:paddingStart="20dp" android:paddingEnd="20dp" android:paddingTop="12dp" android:paddingBottom="12dp" android:text="Все приложения" android:textColor="#CCFFFFFF" android:textSize="17sp" />
         </LinearLayout>
     </LinearLayout>
 
     <!-- приложения: по центру свободной области экрана -->
-    <LinearLayout
-        android:id="@+id/appsWrap"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:orientation="vertical"
-        android:gravity="center_vertical"
-        android:paddingStart="56dp"
-        android:paddingEnd="56dp"
-        android:paddingTop="320dp"
-        android:paddingBottom="132dp">
+    <LinearLayout android:id="@+id/appsWrap" android:layout_width="match_parent" android:layout_height="match_parent" android:orientation="vertical" android:gravity="center_vertical" android:paddingStart="56dp" android:paddingEnd="56dp" android:paddingTop="320dp" android:paddingBottom="132dp">
 
-        <LinearLayout
-            android:id="@+id/appsGrid"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical" />
+        <LinearLayout android:id="@+id/appsGrid" android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" />
     </LinearLayout>
 
     <!-- верхняя правая зона: сеть, часы, дата, погода -->
-    <LinearLayout
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="top|end"
-        android:orientation="vertical"
-        android:gravity="end"
-        android:layout_marginTop="40dp"
-        android:layout_marginEnd="56dp">
+    <LinearLayout android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_gravity="top|end" android:orientation="vertical" android:gravity="end" android:layout_marginTop="40dp" android:layout_marginEnd="56dp">
 
-        <LinearLayout
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:gravity="center_vertical">
+        <LinearLayout android:layout_width="wrap_content" android:layout_height="wrap_content" android:orientation="horizontal" android:gravity="center_vertical">
 
-            <TextView
-                android:id="@+id/tvNetwork"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:background="@drawable/pill_bg"
-                android:minHeight="48dp"
-                android:gravity="center"
-                android:focusable="true"
-                android:focusableInTouchMode="true"
-                android:clickable="true"
-                android:paddingStart="20dp"
-                android:paddingEnd="20dp"
-                android:paddingTop="12dp"
-                android:paddingBottom="12dp"
-                android:text="Wi-Fi"
-                android:textColor="#FFFFFFFF"
-                android:textSize="19sp" />
+            <TextView android:id="@+id/tvNetwork" android:layout_width="wrap_content" android:layout_height="wrap_content" android:background="@drawable/pill_bg" android:minHeight="48dp" android:gravity="center" android:focusable="true" android:focusableInTouchMode="true" android:clickable="true" android:paddingStart="20dp" android:paddingEnd="20dp" android:paddingTop="12dp" android:paddingBottom="12dp" android:text="Wi-Fi" android:textColor="#FFFFFFFF" android:textSize="19sp" />
 
-            <TextView
-                android:id="@+id/tvSettings"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="10dp"
-                android:background="@drawable/pill_bg"
-                android:minHeight="48dp"
-                android:gravity="center"
-                android:focusable="true"
-                android:focusableInTouchMode="true"
-                android:clickable="true"
-                android:paddingStart="20dp"
-                android:paddingEnd="20dp"
-                android:paddingTop="12dp"
-                android:paddingBottom="12dp"
-                android:text="Настройки"
-                android:textColor="#FFFFFFFF"
-                android:textSize="19sp" />
+              <TextView android:id="@+id/tvVpn" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginStart="12dp" android:background="@drawable/pill_bg" android:minHeight="48dp" android:gravity="center" android:focusable="true" android:focusableInTouchMode="true" android:clickable="true" android:paddingStart="20dp" android:paddingEnd="20dp" android:paddingTop="12dp" android:paddingBottom="12dp" android:text="VPN" android:textColor="#FFFF6B6B" android:textSize="15sp" />
 
-            <TextView
-                android:id="@+id/tvClock"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="22dp"
-                android:text="00:00"
-                android:textColor="#FFFFFFFF"
-                android:textSize="46sp"
-                android:fontFamily="sans-serif-light" />
+            <TextView android:id="@+id/tvSettings" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginStart="10dp" android:background="@drawable/pill_bg" android:minHeight="48dp" android:gravity="center" android:focusable="true" android:focusableInTouchMode="true" android:clickable="true" android:paddingStart="20dp" android:paddingEnd="20dp" android:paddingTop="12dp" android:paddingBottom="12dp" android:text="Настройки" android:textColor="#FFFFFFFF" android:textSize="19sp" />
 
-            <LinearLayout
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:layout_marginStart="14dp">
+            <TextView android:id="@+id/tvClock" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginStart="22dp" android:text="00:00" android:textColor="#FFFFFFFF" android:textSize="46sp" android:fontFamily="sans-serif-light" />
 
-                <TextView
-                    android:id="@+id/tvDate"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="ВТОРНИК"
-                    android:textColor="#B3FFFFFF"
-                    android:textSize="17sp"
-                    android:letterSpacing="0.08" />
+            <LinearLayout android:layout_width="wrap_content" android:layout_height="wrap_content" android:orientation="vertical" android:layout_marginStart="14dp">
 
-                <TextView
-                    android:id="@+id/tvDateNum"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="4 НОЯБРЯ"
-                    android:textColor="#80FFFFFF"
-                    android:textSize="16sp"
-                    android:letterSpacing="0.06" />
+                <TextView android:id="@+id/tvDate" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="ВТОРНИК" android:textColor="#B3FFFFFF" android:textSize="17sp" android:letterSpacing="0.08" />
+
+                <TextView android:id="@+id/tvDateNum" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="4 НОЯБРЯ" android:textColor="#80FFFFFF" android:textSize="16sp" android:letterSpacing="0.06" />
             </LinearLayout>
         </LinearLayout>
 
-        <LinearLayout
-            android:id="@+id/weatherCard"
-            android:layout_width="252dp"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="18dp"
-            android:background="@drawable/card_bg"
-            android:orientation="vertical"
-            android:padding="16dp">
+        <LinearLayout android:id="@+id/weatherCard" android:layout_width="252dp" android:layout_height="wrap_content" android:layout_marginTop="18dp" android:background="@drawable/card_bg" android:orientation="vertical" android:padding="16dp">
 
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:gravity="center_vertical">
+            <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal" android:gravity="center_vertical">
 
-                <TextView
-                    android:id="@+id/tvWeatherTemp"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="--°"
-                    android:textColor="#FFFFFFFF"
-                    android:textSize="38sp"
-                    android:fontFamily="sans-serif-light" />
+                <TextView android:id="@+id/tvWeatherTemp" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="--°" android:textColor="#FFFFFFFF" android:textSize="38sp" android:fontFamily="sans-serif-light" />
 
-                <TextView
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:text="" />
+                <TextView android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:text="" />
 
-                <TextView
-                    android:id="@+id/tvWeatherIcon"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text=""
-                    android:textSize="24sp" />
+                <TextView android:id="@+id/tvWeatherIcon" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="" android:textSize="24sp" />
             </LinearLayout>
 
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:gravity="center_vertical"
-                android:layout_marginTop="2dp">
+            <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal" android:gravity="center_vertical" android:layout_marginTop="2dp">
 
-                <TextView
-                    android:id="@+id/tvWeatherCond"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="загрузка…"
-                    android:textColor="#E6FFFFFF"
-                    android:textSize="13sp"
-                    android:maxLines="1"
-                    android:ellipsize="end" />
+                <TextView android:id="@+id/tvWeatherCond" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="загрузка…" android:textColor="#E6FFFFFF" android:textSize="13sp" android:maxLines="1" android:ellipsize="end" />
 
-                <TextView
-                    android:id="@+id/tvWeatherCity"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="6dp"
-                    android:text=""
-                    android:textColor="#8FB3D9"
-                    android:textSize="13sp"
-                    android:maxLines="1"
-                    android:ellipsize="end" />
+                <TextView android:id="@+id/tvWeatherCity" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginStart="6dp" android:text="" android:textColor="#8FB3D9" android:textSize="13sp" android:maxLines="1" android:ellipsize="end" />
             </LinearLayout>
 
-            <View
-                android:layout_width="match_parent"
-                android:layout_height="1dp"
-                android:layout_marginTop="12dp"
-                android:background="#1AFFFFFF" />
+            <View android:layout_width="match_parent" android:layout_height="1dp" android:layout_marginTop="12dp" android:background="#1AFFFFFF" />
 
-            <LinearLayout
-                android:id="@+id/weekRow"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="12dp"
-                android:orientation="horizontal"
-                android:baselineAligned="false" />
+            <LinearLayout android:id="@+id/weekRow" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="12dp" android:orientation="horizontal" android:baselineAligned="false" />
         </LinearLayout>
     </LinearLayout>
 
     <!-- полный список приложений (открывается кнопкой) -->
-    <LinearLayout
-    android:id="@+id/allAppsPanel"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:background="#E60A0F1A"
-    android:orientation="vertical"
-    android:paddingStart="56dp"
-    android:paddingEnd="56dp"
-    android:paddingTop="40dp"
-    android:paddingBottom="32dp"
-    android:visibility="gone">
+    <LinearLayout android:id="@+id/allAppsPanel" android:layout_width="match_parent" android:layout_height="match_parent" android:background="#E60A0F1A" android:orientation="vertical" android:paddingStart="56dp" android:paddingEnd="56dp" android:paddingTop="40dp" android:paddingBottom="32dp" android:visibility="gone">
 
-    <TextView
-    android:layout_width="wrap_content"
-    android:layout_height="wrap_content"
-    android:text="Все приложения"
-    android:textColor="#FFFFFFFF"
-    android:textSize="27sp"
-    android:layout_marginBottom="18dp" />
+    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Все приложения" android:textColor="#FFFFFFFF" android:textSize="27sp" android:layout_marginBottom="18dp" />
 
-    <ScrollView
-    android:layout_width="match_parent"
-    android:layout_height="0dp"
-    android:layout_weight="1"
-    android:scrollbars="none">
+    <ScrollView android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1" android:scrollbars="none">
 
-    <LinearLayout
-    android:id="@+id/allAppsGrid"
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:orientation="vertical" />
+    <LinearLayout android:id="@+id/allAppsGrid" android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" />
     </ScrollView>
     </LinearLayout>
 
         <!-- подпись автора -->
-    <LinearLayout
-        android:id="@+id/signature"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="bottom|end"
-        android:focusable="true"
-        android:layout_marginEnd="56dp"
-        android:layout_marginBottom="44dp"
-        android:orientation="vertical"
-        android:gravity="end">
+    <LinearLayout android:id="@+id/signature" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_gravity="bottom|end" android:focusable="true" android:layout_marginEnd="56dp" android:layout_marginBottom="44dp" android:orientation="vertical" android:gravity="end">
 
-        <TextView
-            android:id="@+id/tvDesignBy"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="DESIGN BY"
-            android:textColor="#59FFFFFF"
-            android:textSize="11sp"
-            android:letterSpacing="0.42" />
+        <TextView android:id="@+id/tvDesignBy" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="DESIGN BY" android:textColor="#59FFFFFF" android:textSize="11sp" android:letterSpacing="0.42" />
 
-        <TextView
-            android:id="@+id/tvAuthor"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="2dp"
-            android:text="ANDREY MASLOBOEV"
-            android:textColor="#CCFFFFFF"
-            android:textSize="15sp"
-            android:textStyle="bold"
-            android:letterSpacing="0.18" />
+        <TextView android:id="@+id/tvAuthor" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="2dp" android:text="ANDREY MASLOBOEV" android:textColor="#CCFFFFFF" android:textSize="15sp" android:textStyle="bold" android:letterSpacing="0.18" />
     </LinearLayout>
 </FrameLayout>

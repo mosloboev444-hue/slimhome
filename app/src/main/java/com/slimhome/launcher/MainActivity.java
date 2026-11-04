@@ -58,7 +58,7 @@ public class MainActivity extends Activity {
     private final List<View> tiles = new ArrayList<>();
     private final List<View> icons = new ArrayList<>();
     private View tintA, tintB;
-    private TextView tvGreeting, tvAllApps;
+    private TextView tvGreeting, tvAllApps, tvVpn;
     private LinearLayout allAppsPanel, allAppsGrid;
     private boolean panelOpen;
     private ViewGroup rootView;
@@ -75,6 +75,7 @@ public class MainActivity extends Activity {
             tvDate.setText(wd);
             tvDateNum.setText(dayMonth.format(now.getTime()).toUpperCase(new Locale("ru")));
             tvGreeting.setText(greeting(now.get(Calendar.HOUR_OF_DAY)));
+            updateVpn();
             ui.postDelayed(this, 10000);
         }
     };
@@ -109,6 +110,8 @@ public class MainActivity extends Activity {
         allAppsGrid = findViewById(R.id.allAppsGrid);
         tintB = findViewById(R.id.tintB);
 
+        tvVpn = findViewById(R.id.tvVpn);
+        stylePill(tvVpn, this::openVpn);
         TextView tvSettings = findViewById(R.id.tvSettings);
         stylePill(tvSettings, this::openSettings);
         stylePill(tvNetwork, this::openNetwork);
@@ -617,6 +620,43 @@ public class MainActivity extends Activity {
         }
     }
     // ---------- настройки ----------
+    /** Состояние VPN: зелёная кнопка — туннель поднят, красная — нет. */
+    private void updateVpn() {
+        if (tvVpn == null) return;
+        boolean on = false;
+        try {
+            android.net.ConnectivityManager cm = (android.net.ConnectivityManager)
+                    getSystemService(android.content.Context.CONNECTIVITY_SERVICE);
+            if (cm != null) {
+                for (android.net.Network n : cm.getAllNetworks()) {
+                    android.net.NetworkCapabilities caps = cm.getNetworkCapabilities(n);
+                    if (caps != null && caps.hasTransport(android.net.NetworkCapabilities.TRANSPORT_VPN)) {
+                        on = true;
+                        break;
+                    }
+                }
+            }
+        } catch (Throwable ignored) { }
+        tvVpn.setText(on ? "VPN · вкл" : "VPN · выкл");
+        tvVpn.setTextColor(on ? Color.parseColor("#FF39D98A") : Color.parseColor("#FFFF6B6B"));
+    }
+
+    /** Клик по кнопке VPN: включает установленный VPN-клиент или открывает настройки VPN. */
+    private void openVpn() {
+        String[] vpnApps = {"com.wireguard.android", "org.amnezia.vpn", "com.v2ray.ang",
+                "free.vpn.unblock.proxy.vpn.master.pro", "com.psiphon3"};
+        for (String pkg : vpnApps) {
+            android.content.Intent i = getPackageManager().getLaunchIntentForPackage(pkg);
+            if (i != null) {
+                try { startActivity(i); return; } catch (Throwable ignored) { }
+            }
+        }
+        try {
+            startActivity(new android.content.Intent("android.settings.VPN_SETTINGS")
+                    .addFlags(android.content.Intent.FLAG_ACTIVITY_NEW_TASK));
+        } catch (Throwable ignored) { }
+    }
+
     private void openSettings() {
         Intent[] variants = new Intent[] {
                 new Intent().setClassName("com.android.tv.settings", "com.android.tv.settings.MainSettings"),
