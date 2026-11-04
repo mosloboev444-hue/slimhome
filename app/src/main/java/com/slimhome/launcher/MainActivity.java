@@ -53,7 +53,7 @@ public class MainActivity extends Activity {
     private final SimpleDateFormat weekday = new SimpleDateFormat("EEEE", new Locale("ru"));
     private final SimpleDateFormat dayMonth = new SimpleDateFormat("d MMMM", new Locale("ru"));
 
-    private TextView tvClock, tvDate, tvDateNum, tvNetwork, tvTemp, tvCond, tvCity;
+    private TextView tvClock, tvDate, tvDateNum, tvNetwork, tvTemp, tvCond, tvCity, tvWeatherIcon;
     private LinearLayout appsGrid, weekRow;
     private final List<View> tiles = new ArrayList<>();
     private View tintA, tintB;
@@ -97,6 +97,7 @@ public class MainActivity extends Activity {
         tvTemp = findViewById(R.id.tvWeatherTemp);
         tvCond = findViewById(R.id.tvWeatherCond);
         tvCity = findViewById(R.id.tvWeatherCity);
+        tvWeatherIcon = findViewById(R.id.tvWeatherIcon);
         appsGrid = findViewById(R.id.appsGrid);
         weekRow = findViewById(R.id.weekRow);
         tintA = findViewById(R.id.tintA);
@@ -116,6 +117,10 @@ public class MainActivity extends Activity {
         signature.setOnFocusChangeListener((v, has) -> {
             tvAuthor(has);
             if (has) playWink(); else hideFace();
+        });
+        signature.setOnLongClickListener(v -> {
+            openAppearanceSettings();
+            return true;
         });
 
         // подпись автора: переливающийся градиент
@@ -170,8 +175,25 @@ public class MainActivity extends Activity {
         if (tiles.isEmpty()) buildApps();
     }
 
+    @Override public boolean onKeyLongPress(int code, KeyEvent e) {
+        if (code == KeyEvent.KEYCODE_MENU) { openAppearanceSettings(); return true; }
+        return super.onKeyLongPress(code, e);
+    }
+
     @Override public boolean onKeyDown(int code, KeyEvent e) {
-        if (code == KeyEvent.KEYCODE_MENU) { loadWeather(); return true; }
+        if (appearancePanel != null) {
+            if (code == KeyEvent.KEYCODE_BACK || code == KeyEvent.KEYCODE_MENU) {
+                closeAppearanceSettings();
+                return true;
+            }
+        }
+        if (code == KeyEvent.KEYCODE_MENU) {
+            if (e.getRepeatCount() == 0) {
+                e.startTracking();
+                return true;   // короткое нажатие — погода, долгое — настройки вида
+            }
+            return true;
+        }
         return super.onKeyDown(code, e);
     }
 
@@ -183,6 +205,171 @@ public class MainActivity extends Activity {
         return "Доброй ночи";
     }
 
+    // ---------- настройки внешнего вида ----------
+    private android.widget.FrameLayout appearancePanel;
+
+    private int prefInt(String key, int def) {
+        return prefs().getInt(key, def);
+    }
+
+    private boolean prefBool(String key, boolean def) {
+        return prefs().getBoolean(key, def);
+    }
+
+    private void openAppearanceSettings() {
+        if (appearancePanel != null) return;
+
+        android.widget.FrameLayout overlay = new android.widget.FrameLayout(this);
+        overlay.setBackgroundColor(0xE6070B12);
+        overlay.setFocusable(false);
+        overlay.setClickable(true);
+
+        LinearLayout card = new LinearLayout(this);
+        card.setOrientation(LinearLayout.VERTICAL);
+        card.setPadding(dp(40), dp(32), dp(40), dp(32));
+
+        TextView title = new TextView(this);
+        title.setText("Вид главного экрана");
+        title.setTextColor(0xFFFFFFFF);
+        title.setTextSize(24);
+        title.setPadding(0, 0, 0, dp(6));
+        card.addView(title);
+
+        TextView hint = new TextView(this);
+        hint.setText("Стрелки — выбор, OK — изменить, BACK — закрыть");
+        hint.setTextColor(0xFF8FB3D9);
+        hint.setTextSize(13);
+        hint.setPadding(0, 0, 0, dp(18));
+        card.addView(hint);
+
+        final int[] colOptions = {0, 3, 4, 5, 6, 7};
+        final String[] colLabels = {"Авто", "3 колонки", "4 колонки", "5 колонок", "6 колонок", "7 колонок"};
+        card.addView(settingsRow("Колонок приложений", new Runnable() {
+            @Override public void run() {
+                int cur = prefInt("grid_cols", 0);
+                int idx = 0;
+                for (int i = 0; i < colOptions.length; i++) if (colOptions[i] == cur) idx = i;
+                idx = (idx + 1) % colOptions.length;
+                prefs().edit().putInt("grid_cols", colOptions[idx]).apply();
+                refreshSettingsLabels();
+                buildApps();
+            }
+        }, "cols"));
+
+        final int[] sizeOptions = {0, 1, 2};
+        card.addView(settingsRow("Размер плиток", new Runnable() {
+            @Override public void run() {
+                int cur = prefInt("tile_size", 0);
+                prefs().edit().putInt("tile_size", (cur + 1) % sizeOptions.length).apply();
+                refreshSettingsLabels();
+                buildApps();
+            }
+        }, "size"));
+
+        card.addView(settingsRow("Магазин Play", new Runnable() {
+            @Override public void run() {
+                prefs().edit().putBoolean("show_play_store", !prefBool("show_play_store", false)).apply();
+                refreshSettingsLabels();
+                buildApps();
+            }
+        }, "play"));
+
+        card.addView(settingsRow("Автозапуск IPTV", new Runnable() {
+            @Override public void run() {
+                prefs().edit().putBoolean("autostart_iptv", !prefBool("autostart_iptv", true)).apply();
+                refreshSettingsLabels();
+            }
+        }, "iptv"));
+
+        card.addView(settingsRow("Сбросить настройки", new Runnable() {
+            @Override public void run() {
+                prefs().edit().remove("grid_cols").remove("tile_size")
+                        .remove("show_play_store").remove("autostart_iptv").apply();
+                refreshSettingsLabels();
+                buildApps();
+            }
+        }, "reset"));
+
+        card.setBackgroundColor(0xFF131C2B);
+        android.widget.FrameLayout.LayoutParams clp = new android.widget.FrameLayout.LayoutParams(
+                dp(560), ViewGroup.LayoutParams.WRAP_CONTENT);
+        clp.gravity = Gravity.CENTER;
+        overlay.addView(card, clp);
+
+        overlay.setOnKeyListener((v, code, e) -> {
+            if (code == KeyEvent.KEYCODE_BACK && e.getAction() == KeyEvent.ACTION_UP) {
+                closeAppearanceSettings();
+                return true;
+            }
+            return false;
+        });
+
+        appearancePanel = overlay;
+        if (rootView instanceof ViewGroup) ((ViewGroup) rootView).addView(overlay,
+                new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
+                        ViewGroup.LayoutParams.MATCH_PARENT));
+        refreshSettingsLabels();
+        View firstRow = card.getChildAt(2);     // первый пункт после заголовка и подсказки
+        if (firstRow != null) firstRow.requestFocus();
+    }
+
+    private TextView settingsRow(String label, final Runnable action, String tag) {
+        final TextView row = new TextView(this);
+        row.setTag(tag);
+        row.setText(label);
+        row.setTextColor(0xFFFFFFFF);
+        row.setTextSize(17);
+        row.setPadding(dp(18), dp(14), dp(18), dp(14));
+        row.setBackgroundResource(R.drawable.tile_min);
+        row.setFocusable(true);
+        row.setClickable(true);
+        row.setTag(tag);
+        LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        lp.bottomMargin = dp(10);
+        row.setLayoutParams(lp);
+        row.setOnClickListener(v -> action.run());
+        row.setOnFocusChangeListener((v, has) -> v.setBackgroundResource(R.drawable.tile_min));
+        return row;
+    }
+
+    private void refreshSettingsLabels() {
+        if (appearancePanel == null) return;
+        String[] cols = {"Авто", "3 колонки", "4 колонки", "5 колонок", "6 колонок", "7 колонок"};
+        int[] colValues = {0, 3, 4, 5, 6, 7};
+        int cv = prefInt("grid_cols", 0);
+        String colsText = cols[0];
+        for (int i = 0; i < colValues.length; i++) if (colValues[i] == cv) colsText = cols[i];
+
+        String[] sizes = {"Авто", "Компактные", "Крупные"};
+        String sizeText = sizes[Math.min(2, Math.max(0, prefInt("tile_size", 0)))];
+
+        updateRowText("cols", "Колонок приложений: " + colsText);
+        updateRowText("size", "Размер плиток: " + sizeText);
+        updateRowText("play", "Магазин Play: " + (prefBool("show_play_store", false) ? "показан" : "скрыт"));
+        updateRowText("iptv", "Автозапуск IPTV: " + (prefBool("autostart_iptv", true) ? "включён" : "выключен"));
+    }
+
+    private void updateRowText(String tag, String text) {
+        if (!(appearancePanel instanceof android.widget.FrameLayout)) return;
+        android.widget.FrameLayout f = (android.widget.FrameLayout) appearancePanel;
+        View card = f.getChildAt(0);
+        if (!(card instanceof LinearLayout)) return;
+        LinearLayout ll = (LinearLayout) card;
+        for (int i = 0; i < ll.getChildCount(); i++) {
+            View v = ll.getChildAt(i);
+            if (v instanceof TextView && tag.equals(String.valueOf(v.getTag()))) {
+                ((TextView) v).setText(text);
+            }
+        }
+    }
+
+    private void closeAppearanceSettings() {
+        if (appearancePanel == null) return;
+        if (rootView instanceof ViewGroup) ((ViewGroup) rootView).removeView(appearancePanel);
+        appearancePanel = null;
+        if (!tiles.isEmpty()) tiles.get(0).requestFocus();
+    }
     private void toggleAllApps() {
         if (panelOpen) { closeAllApps(); return; }
         if (allAppsGrid.getChildCount() == 0) buildAllApps();
@@ -213,11 +400,12 @@ public class MainActivity extends Activity {
     private void buildAllApps() {
         allAppsGrid.removeAllViews();
         PackageManager pm = getPackageManager();
-        final List<String> hidden = java.util.Arrays.asList(
-                "com.android.vending",        // Play Store
+        final List<String> hidden = new ArrayList<>();
+        if (!prefBool("show_play_store", false)) hidden.add("com.android.vending");   // Play Store — по настройке
+        hidden.addAll(java.util.Arrays.asList(
                 "com.gathin.tvhome", "com.oranth.tvlauncher", "com.spocky.projengmenu",
                 "com.droidlogic.miracast", "com.droidlogic.appinstall",
-                "io.github.sumyabazar1.weather");
+                "io.github.sumyabazar1.weather"));
 
         Intent main = new Intent(Intent.ACTION_MAIN).addCategory(Intent.CATEGORY_LAUNCHER);
         Intent lean = new Intent(Intent.ACTION_MAIN).addCategory(Intent.CATEGORY_LEANBACK_LAUNCHER);
@@ -401,8 +589,9 @@ public class MainActivity extends Activity {
         PackageManager pm = getPackageManager();
 
         // старые лаунчеры не показываем, но «Настройки» и системные утилиты оставляем
-        final List<String> hidden = java.util.Arrays.asList(
-                "com.android.vending",        // Play Store
+        final List<String> hidden = new ArrayList<>();
+        if (!prefBool("show_play_store", false)) hidden.add("com.android.vending");   // Play Store — по настройке
+        hidden.addAll(java.util.Arrays.asList(
                 "com.gathin.tvhome",
                 "com.oranth.tvlauncher",
                 "com.spocky.projengmenu",
@@ -410,7 +599,7 @@ public class MainActivity extends Activity {
                 "com.droidlogic.appinstall",  // AppInstaller
                 "io.github.sumyabazar1.weather", // погода уже есть карточкой
                 "com.android.gallery3d"     // галерея
-        );
+        ));
 
         Intent main = new Intent(Intent.ACTION_MAIN).addCategory(Intent.CATEGORY_LAUNCHER);
         Intent lean = new Intent(Intent.ACTION_MAIN).addCategory(Intent.CATEGORY_LEANBACK_LAUNCHER);
@@ -465,9 +654,16 @@ public class MainActivity extends Activity {
             if (gridH <= 0) gridH = dm.heightPixels - dp(452);
         }
 
-        int perRow = 0;
-        int tileH = dp(160);
-        for (int r = 1; r <= 3; r++) {
+        int prefCols = prefInt("grid_cols", 0);
+        float sizeK = prefInt("tile_size", 0) == 2 ? 1.12f : (prefInt("tile_size", 0) == 1 ? 0.88f : 1f);
+        int perRow = prefCols > 0 ? Math.min(prefCols, Math.max(1, n)) : 0;
+        int tileH = dp((int) (160 * sizeK));
+        if (perRow > 0) {
+            int rowsNeeded = (int) Math.ceil(n / (double) perRow);
+            int rowsUsed = Math.max(1, Math.min(3, rowsNeeded));
+            tileH = Math.max(dp(72), (gridH - gapY * (rowsUsed - 1)) / rowsUsed);
+        }
+        for (int r = 1; r <= 3 && perRow == 0; r++) {
             int cols = (int) Math.ceil(n / (double) r);
             if (cols < 1) cols = 1;
             if (cols > 8) continue;
@@ -686,25 +882,28 @@ public class MainActivity extends Activity {
             @Override public void onWeather(String city, int temp, String condition,
                                             String icon, List<Weather.Day> week) {
                 tvTemp.setText(temp + "°");
-                tvCond.setText(icon + "  " + condition);
+                tvCond.setText(condition);
+                if (tvWeatherIcon != null) tvWeatherIcon.setText(icon);
                 tvCity.setText(city);
                 weekRow.removeAllViews();
-                int count = Math.min(week.size(), 7);
+                int count = Math.min(week.size(), 4);
                 for (int i = 0; i < count; i++) {
                     Weather.Day d = week.get(i);
-                    LinearLayout col = new LinearLayout(MainActivity.this);
-                    col.setOrientation(LinearLayout.VERTICAL);
-                    col.setGravity(Gravity.CENTER_HORIZONTAL);
+                    LinearLayout chip = new LinearLayout(MainActivity.this);
+                    chip.setOrientation(LinearLayout.VERTICAL);
+                    chip.setGravity(Gravity.CENTER_HORIZONTAL);
+                    chip.setBackgroundResource(R.drawable.chip_bg);
+                    chip.setPadding(dp(8), dp(6), dp(8), dp(6));
                     LinearLayout.LayoutParams clp = new LinearLayout.LayoutParams(0,
                             ViewGroup.LayoutParams.WRAP_CONTENT, 1f);
-                    col.setLayoutParams(clp);
+                    if (i > 0) clp.leftMargin = dp(6);
+                    chip.setLayoutParams(clp);
 
-                    TextView name = smallText(d.name, "#B3FFFFFF", 16);
-                    TextView ic = smallText(d.icon, "#FFFFFFFF", 19);
-                    TextView hi = smallText(d.max + "°", "#FFFFFFFF", 16);
-                    TextView lo = smallText(d.min + "°", "#80FFFFFF", 15);
-                    col.addView(name); col.addView(ic); col.addView(hi); col.addView(lo);
-                    weekRow.addView(col);
+                    TextView name = smallText(d.name, "#A6FFFFFF", 11);
+                    TextView hi = smallText(d.max + "°", "#FFFFFFFF", 13);
+                    TextView lo = smallText(d.min + "°", "#80FFFFFF", 11);
+                    chip.addView(name); chip.addView(hi); chip.addView(lo);
+                    weekRow.addView(chip);
                 }
             }
 
