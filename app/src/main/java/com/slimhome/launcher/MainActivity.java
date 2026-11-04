@@ -60,6 +60,7 @@ public class MainActivity extends Activity {
     private View tintA, tintB;
     private TextView tvGreeting, tvAllApps, tvVpn;
     private FireRingView fireRing;
+    private SparksView sparks;
     private boolean vpnWasFocused = false;
     private boolean pendingVpnFocus = false;
     private LinearLayout allAppsPanel, allAppsGrid;
@@ -123,6 +124,9 @@ public class MainActivity extends Activity {
 
         rootView = findViewById(R.id.root);
         attachFireRing();
+        sparks = new SparksView(this);
+        rootView.addView(sparks, new FrameLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
         View signature = findViewById(R.id.signature);
         signature.setOnFocusChangeListener((v, has) -> {
             tvAuthor(has);
@@ -1053,6 +1057,8 @@ public class MainActivity extends Activity {
             if (has) {
                 TileFx.focus(v, fx);       // у каждой плитки своя анимация
                 setAmbientColor(ambient);
+                playFocusSound(v);
+                burstSparks(v, ambient);
                 halo.animate().alpha(0.85f).scaleX(1.04f).scaleY(1.04f).setDuration(220).start();
             } else {
                 TileFx.blur(v);
@@ -1085,6 +1091,26 @@ public class MainActivity extends Activity {
         next.setBackground(g);
         next.animate().alpha(0.30f).setDuration(320).start();
         prev.animate().alpha(0f).setDuration(260).start();
+    }
+
+    /** Искры цвета иконки вокруг выбранной плитки. */
+    private void burstSparks(View tile, int color) {
+        if (sparks == null || rootView == null) return;
+        int[] t = new int[2];
+        int[] r = new int[2];
+        tile.getLocationInWindow(t);
+        rootView.getLocationInWindow(r);
+        float cx = t[0] - r[0] + tile.getWidth() / 2f;
+        float cy = t[1] - r[1] + tile.getHeight() / 2f;
+        sparks.burst(cx, cy, color);
+    }
+
+    /** Короткий системный звук навигации. */
+    private void playFocusSound(View v) {
+        try {
+            android.media.AudioManager am = (android.media.AudioManager) getSystemService(AUDIO_SERVICE);
+            if (am != null) am.playSoundEffect(android.media.AudioManager.FX_FOCUS_NAVIGATION_UP, 0.35f);
+        } catch (Throwable ignored) { }
     }
 
     /** Мягкое радиальное свечение цветом приложения. */

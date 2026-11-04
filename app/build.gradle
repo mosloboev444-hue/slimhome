@@ -17,8 +17,8 @@ android {
         applicationId 'com.slimhome.launcher'
         minSdk 26
         targetSdk 34
-        versionCode 35
-        versionName '4.8'
+        versionCode 37
+        versionName '5.0'
     }
 
     signingConfigs {
