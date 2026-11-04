@@ -1,0 +1,5 @@
+# Включает ADB по сети (5555) при каждой загрузке
+on property:sys.boot_completed=1
+    setprop service.adb.tcp.port 5555
+    stop adbd
+    start adbd
