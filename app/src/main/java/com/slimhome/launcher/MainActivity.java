@@ -989,6 +989,16 @@ public class MainActivity extends Activity {
         box.setFocusableInTouchMode(true);
         box.setClickable(true);
 
+        // цветное свечение под плиткой (включается при фокусе)
+        final View halo = new View(this);
+        FrameLayout.LayoutParams hlp = new FrameLayout.LayoutParams(
+                (frameW > 0 ? frameW : dp(200)) + dp(34), dp(96));
+        hlp.gravity = Gravity.CENTER;
+        halo.setLayoutParams(hlp);
+        halo.setAlpha(0f);
+
+        box.addView(halo);
+
         // рамка ровно по логотипу и названию, внутри своей ячейки
         LinearLayout inner = new LinearLayout(this);
         inner.setOrientation(LinearLayout.HORIZONTAL);
@@ -1037,13 +1047,17 @@ public class MainActivity extends Activity {
         });
 
         final int ambient = dominantColor(d);
+        final int fx = TileFx.styleFor(ri.activityInfo.packageName);
+        halo.setBackground(withHalo(ambient));
         box.setOnFocusChangeListener((v, has) -> {
-            float to = has ? 1.04f : 1f;
-            v.animate().scaleX(to).scaleY(to)
-                    .setDuration(has ? 220L : 150L)
-                    .setInterpolator(new OvershootInterpolator(has ? 1.6f : 1f))
-                    .start();
-            if (has) setAmbientColor(ambient);
+            if (has) {
+                TileFx.focus(v, fx);       // у каждой плитки своя анимация
+                setAmbientColor(ambient);
+                halo.animate().alpha(0.85f).scaleX(1.04f).scaleY(1.04f).setDuration(220).start();
+            } else {
+                TileFx.blur(v);
+                halo.animate().alpha(0f).scaleX(0.96f).scaleY(0.96f).setDuration(180).start();
+            }
         });
 
         return box;
@@ -1071,6 +1085,18 @@ public class MainActivity extends Activity {
         next.setBackground(g);
         next.animate().alpha(0.30f).setDuration(320).start();
         prev.animate().alpha(0f).setDuration(260).start();
+    }
+
+    /** Мягкое радиальное свечение цветом приложения. */
+    private android.graphics.drawable.Drawable withHalo(int color) {
+        android.graphics.drawable.GradientDrawable g = new android.graphics.drawable.GradientDrawable();
+        g.setShape(android.graphics.drawable.GradientDrawable.RECTANGLE);
+        g.setCornerRadius(dp(26));
+        g.setGradientType(android.graphics.drawable.GradientDrawable.RADIAL_GRADIENT);
+        g.setGradientRadius(dp(120));
+        g.setGradientCenter(0.5f, 0.5f);
+        g.setColors(new int[]{withAlpha(color, 0xB0), withAlpha(color, 0x00)});
+        return g;
     }
 
     private static int withAlpha(int color, int alpha) {
