@@ -225,8 +225,8 @@ public class MainActivity extends Activity {
         // цифры 1–5: запуск закреплённых приложений
         if (code >= KeyEvent.KEYCODE_1 && code <= KeyEvent.KEYCODE_5) {
             int idx = code - KeyEvent.KEYCODE_1;
-            String[] quick = {"com.slimiptv.player", "com.slimtube.app", "ru.rt.video.app.tv",
-                    "tv.limehd.stb", "ru.vk.store.tv"};
+            String[] quick = {"tv.limehd.stb", "ru.rt.video.app.tv", "ru.vk.store.tv",
+                    "com.slimtube.app", "com.slimiptv.player"};
             if (idx < quick.length) {
                 android.content.Intent qi = getPackageManager().getLaunchIntentForPackage(quick[idx]);
                 if (qi != null) { qi.addFlags(android.content.Intent.FLAG_ACTIVITY_NEW_TASK); startActivity(qi); return true; }
@@ -330,7 +330,7 @@ public class MainActivity extends Activity {
             }
         }, "play"));
 
-        card.addView(settingsRow("Автозапуск IPTV", new Runnable() {
+        card.addView(settingsRow("Автозапуск Lime HD", new Runnable() {
             @Override public void run() {
                 prefs().edit().putBoolean("autostart_iptv", !prefBool("autostart_iptv", true)).apply();
                 refreshSettingsLabels();
@@ -417,7 +417,7 @@ public class MainActivity extends Activity {
         updateRowText("wbg", "Фон погоды: " + (prefBool("weather_bg", false) ? "стекло" : "без фона"));
         updateRowText("alpha", "Прозрачность погоды: " + prefInt("weather_alpha", 50) + "%");
         updateRowText("play", "Магазин Play: " + (prefBool("show_play_store", false) ? "показан" : "скрыт"));
-        updateRowText("iptv", "Автозапуск IPTV: " + (prefBool("autostart_iptv", true) ? "включён" : "выключен"));
+        updateRowText("iptv", "Автозапуск Lime HD: " + (prefBool("autostart_iptv", true) ? "включён" : "выключен"));
     }
 
     private void updateRowText(String tag, String text) {
@@ -818,7 +818,6 @@ public class MainActivity extends Activity {
 
         // закреплённые приложения идут первыми, дальше — по алфавиту
         final List<String> pinned = java.util.Arrays.asList(
-                "com.slimiptv.player",     // SlimIPTV — первым на главном экране
                 "ru.rt.video.app.tv",      // Wink
                 "tv.limehd.stb",           // Лайм HD
                 "ru.vk.store.tv",          // RuStore
@@ -1323,8 +1322,8 @@ public class MainActivity extends Activity {
             p.edit().putLong("boot_id", bootId).apply();
             if (!p.getBoolean("autostart_iptv", true)) return;
 
-            final Intent iptv = getPackageManager().getLaunchIntentForPackage("com.slimiptv.player");
-            if (iptv == null) return;
+            String target = p.getString("autostart_pkg", "tv.limehd.stb");
+            final Intent iptv = getPackageManager().getLaunchIntentForPackage(target);
 
             new Handler(Looper.getMainLooper()).postDelayed(new Runnable() {
                 @Override public void run() {
