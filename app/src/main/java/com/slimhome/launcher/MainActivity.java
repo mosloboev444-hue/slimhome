@@ -60,6 +60,8 @@ public class MainActivity extends Activity {
     private View tintA, tintB;
     private TextView tvGreeting, tvAllApps, tvVpn;
     private FireRingView fireRing;
+    private boolean vpnWasFocused = false;
+    private boolean pendingVpnFocus = false;
     private LinearLayout allAppsPanel, allAppsGrid;
     private boolean panelOpen;
     private ViewGroup rootView;
@@ -180,6 +182,10 @@ public class MainActivity extends Activity {
 
     @Override protected void onResume() {
         super.onResume();
+        if (tvVpn != null && fireRing != null) {
+            pendingVpnFocus = true;
+            tvVpn.postDelayed(this::focusVpn, 1600);
+        }
         updateNetwork();
         if (tiles.isEmpty()) buildApps();
     }
@@ -653,7 +659,8 @@ public class MainActivity extends Activity {
             }
         } catch (Throwable ignored) { }
         tvVpn.setText("▶  Хочу Ютубчик");
-        tvVpn.setTextColor(on ? Color.parseColor("#FF39D98A") : Color.parseColor("#FFFF6B6B"));
+        tvVpn.setTextColor(tvVpn.hasFocus() ? 0xFF101725
+                : (on ? Color.parseColor("#FF39D98A") : Color.parseColor("#FFFF6B6B")));
     }
 
     /** Клик по кнопке VPN: включает установленный VPN-клиент или открывает настройки VPN. */
@@ -685,6 +692,18 @@ public class MainActivity extends Activity {
     }
 
     /** Огненное кольцо вокруг кнопки «Хочу Ютубчик» при фокусе. */
+    /** Возвращает фокус на главную кнопку и зажигает кольцо. */
+    private void focusVpn() {
+        if (tvVpn == null || fireRing == null) return;
+        boolean ok = tvVpn.hasFocus() || tvVpn.requestFocus();
+        android.util.Log.i("SlimHome", "focusVpn: requestFocus=" + ok + " hasFocus=" + tvVpn.hasFocus());
+        syncFireRingBounds();
+        if (tvVpn.hasFocus()) {
+            tvVpn.setTextColor(0xFF101725);   // тёмный текст на белой плашке
+            fireRing.startFire();
+            pendingVpnFocus = false;
+        }
+    }
     private void attachFireRing() {
         if (rootView == null || tvVpn == null) return;
         fireRing = new FireRingView(this);
@@ -695,7 +714,21 @@ public class MainActivity extends Activity {
 
         tvVpn.post(this::syncFireRingBounds);
 
+        tvVpn.setOnHoverListener((v, event) -> {
+            switch (event.getActionMasked()) {
+                case android.view.MotionEvent.ACTION_HOVER_ENTER:
+                    syncFireRingBounds();
+                    fireRing.startFire();
+                    break;
+                case android.view.MotionEvent.ACTION_HOVER_EXIT:
+                    if (!tvVpn.hasFocus()) fireRing.stopFire();
+                    break;
+            }
+            return false;
+        });
+
         tvVpn.setOnFocusChangeListener((v, has) -> {
+            vpnWasFocused = has;
             tvVpn.setTextColor(has ? 0xFF101725 : 0xFFFF6B6B);
             v.animate().scaleX(has ? 1.05f : 1f).scaleY(has ? 1.05f : 1f).setDuration(150).start();
             v.setElevation(has ? dp(8) : 0);
