@@ -10,11 +10,14 @@
 [![No ads](https://img.shields.io/badge/ads-none-critical?style=flat-square)](#)
 [![Сайт](https://img.shields.io/badge/%D1%81%D0%B0%D0%B9%D1%82-online-6ed6ff?style=flat-square)](https://mosloboev444-hue.github.io/slimhome/)
 
+[![Stars](https://img.shields.io/github/stars/mosloboev444-hue/slimhome?style=flat-square&color=c49bff)](https://github.com/mosloboev444-hue/slimhome/stargazers)
+[![Downloads](https://img.shields.io/github/downloads/mosloboev444-hue/slimhome/total?style=flat-square&color=6ed6ff)](https://github.com/mosloboev444-hue/slimhome/releases)
+
 [Скачать APK](https://github.com/mosloboev444-hue/slimhome/releases/latest) · [Сайт проекта](https://mosloboev444-hue.github.io/slimhome/) · [Другие проекты](#экосистема)
 
 </div>
 
-![Главный экран](screenshots/00-hero.png)
+![Демонстрация](docs/demo.gif)
 
 ## Что умеет
 
