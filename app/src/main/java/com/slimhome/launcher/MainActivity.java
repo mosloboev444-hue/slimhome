@@ -757,6 +757,7 @@ public class MainActivity extends Activity {
                 "io.github.sumyabazar1.weather", // погода уже есть карточкой
                   "com.android.gallery3d",    // галерея
                   "com.google.android.youtube.tv", // YouTube запускается кнопкой SlimVPN
+                  "com.slimtube.app",           // YouTube — только кнопкой «Хочу Ютубчик»
                   "com.slimvpn.app"           // SlimVPN — отдельной кнопкой в панели
         ));
 
@@ -769,7 +770,6 @@ public class MainActivity extends Activity {
         // закреплённые приложения идут первыми, дальше — по алфавиту
         final List<String> pinned = java.util.Arrays.asList(
                 "com.slimiptv.player",     // SlimIPTV — первым на главном экране
-                "com.slimtube.app",     // YouTube со встроенным VPN
                 "ru.rt.video.app.tv",      // Wink
                 "tv.limehd.stb",           // Лайм HD
                 "ru.vk.store.tv",          // RuStore
