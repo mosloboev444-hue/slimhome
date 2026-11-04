@@ -56,6 +56,7 @@ public class MainActivity extends Activity {
     private TextView tvClock, tvDate, tvDateNum, tvNetwork, tvTemp, tvCond, tvCity, tvWeatherIcon;
     private LinearLayout appsGrid, weekRow;
     private final List<View> tiles = new ArrayList<>();
+    private final List<View> icons = new ArrayList<>();
     private View tintA, tintB;
     private TextView tvGreeting, tvAllApps;
     private LinearLayout allAppsPanel, allAppsGrid;
@@ -609,6 +610,7 @@ public class MainActivity extends Activity {
         appsGrid.setClipToPadding(false);
         appsGrid.removeAllViews();
         tiles.clear();
+        icons.clear();
 
         PackageManager pm = getPackageManager();
 
@@ -772,6 +774,16 @@ public class MainActivity extends Activity {
     // ---------- круглые иконки ----------
     private final java.util.HashMap<String, android.graphics.Bitmap> iconCache = new java.util.HashMap<>();
 
+    /** Лёгкое «дыхание» иконки: 0 → −3dp → 0, у каждой свой сдвиг фазы. */
+    private void startIconFloat(View icon, int seed) {
+        android.animation.ValueAnimator va = android.animation.ValueAnimator.ofFloat(0f, -dp(3), 0f);
+        va.setDuration(3600);
+        va.setStartDelay(900L + Math.abs(seed % 1400));
+        va.setRepeatCount(android.animation.ValueAnimator.INFINITE);
+        va.setInterpolator(new android.view.animation.AccelerateDecelerateInterpolator());
+        va.addUpdateListener(a -> icon.setTranslationY((Float) a.getAnimatedValue()));
+        va.start();
+    }
     private android.graphics.Bitmap roundIcon(android.graphics.drawable.Drawable src, int size, String key) {
         String cacheKey = key + "@" + size;
         android.graphics.Bitmap cached = iconCache.get(cacheKey);
@@ -829,6 +841,8 @@ public class MainActivity extends Activity {
         icon.setImageBitmap(roundIcon(d, iconPx, ri.activityInfo.packageName));
         icon.setScaleType(ImageView.ScaleType.FIT_CENTER);
         inner.addView(icon, new LinearLayout.LayoutParams(iconPx, iconPx));
+        icons.add(icon);
+        startIconFloat(icon, ri.activityInfo.packageName.hashCode());
 
         TextView label = new TextView(this);
         label.setText(ri.loadLabel(pm));
@@ -886,9 +900,9 @@ public class MainActivity extends Activity {
         g.setGradientType(GradientDrawable.RADIAL_GRADIENT);
         g.setGradientRadius(Math.max(w, h) * 0.95f);
         g.setGradientCenter(0.72f, 0.18f);
-        g.setColors(new int[]{withAlpha(color, 0xD9), withAlpha(color, 0x00)});
+        g.setColors(new int[]{withAlpha(color, 0xA6), withAlpha(color, 0x00)});
         next.setBackground(g);
-        next.animate().alpha(0.62f).setDuration(260).start();
+        next.animate().alpha(0.30f).setDuration(320).start();
         prev.animate().alpha(0f).setDuration(260).start();
     }
 
