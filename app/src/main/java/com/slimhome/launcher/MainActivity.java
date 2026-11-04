@@ -135,6 +135,7 @@ public class MainActivity extends Activity {
         updateNetwork();
         buildApps();
         loadWeather();
+        applyWeatherAlpha();
         maybeAutostartIptv();
         registerAppsWatcher();
     }
@@ -266,6 +267,16 @@ public class MainActivity extends Activity {
             }
         }, "size"));
 
+        card.addView(settingsRow("Прозрачность погоды", new Runnable() {
+            @Override public void run() {
+                int cur = prefInt("weather_alpha", 50);
+                int next = cur == 50 ? 25 : (cur == 25 ? 75 : (cur == 75 ? 90 : 50));
+                prefs().edit().putInt("weather_alpha", next).apply();
+                applyWeatherAlpha();
+                refreshSettingsLabels();
+            }
+        }, "alpha"));
+
         card.addView(settingsRow("Магазин Play", new Runnable() {
             @Override public void run() {
                 prefs().edit().putBoolean("show_play_store", !prefBool("show_play_store", false)).apply();
@@ -284,13 +295,22 @@ public class MainActivity extends Activity {
         card.addView(settingsRow("Сбросить настройки", new Runnable() {
             @Override public void run() {
                 prefs().edit().remove("grid_cols").remove("tile_size")
-                        .remove("show_play_store").remove("autostart_iptv").apply();
+                        .remove("show_play_store").remove("autostart_iptv")
+                        .remove("weather_alpha").apply();
+                applyWeatherAlpha();
                 refreshSettingsLabels();
                 buildApps();
             }
         }, "reset"));
 
-        card.setBackgroundColor(0xFF131C2B);
+        android.graphics.drawable.GradientDrawable glassCard =
+                new android.graphics.drawable.GradientDrawable(
+                        android.graphics.drawable.GradientDrawable.Orientation.TL_BR,
+                        new int[]{0x40FFFFFF, 0x1AFFFFFF});
+        glassCard.setCornerRadius(dp(26));
+        glassCard.setStroke(dp(1), 0x4DFFFFFF);
+        card.setBackground(glassCard);
+        card.setElevation(dp(18));
         android.widget.FrameLayout.LayoutParams clp = new android.widget.FrameLayout.LayoutParams(
                 dp(560), ViewGroup.LayoutParams.WRAP_CONTENT);
         clp.gravity = Gravity.CENTER;
@@ -329,7 +349,10 @@ public class MainActivity extends Activity {
         lp.bottomMargin = dp(10);
         row.setLayoutParams(lp);
         row.setOnClickListener(v -> action.run());
-        row.setOnFocusChangeListener((v, has) -> v.setBackgroundResource(R.drawable.tile_min));
+        row.setOnFocusChangeListener((v, has) -> {
+            v.setBackgroundResource(R.drawable.tile_min);
+            row.setTextColor(has ? 0xFF0B1220 : 0xFFFFFFFF);   // на белом стекле — тёмный текст
+        });
         return row;
     }
 
@@ -346,6 +369,7 @@ public class MainActivity extends Activity {
 
         updateRowText("cols", "Колонок приложений: " + colsText);
         updateRowText("size", "Размер плиток: " + sizeText);
+        updateRowText("alpha", "Прозрачность погоды: " + prefInt("weather_alpha", 50) + "%");
         updateRowText("play", "Магазин Play: " + (prefBool("show_play_store", false) ? "показан" : "скрыт"));
         updateRowText("iptv", "Автозапуск IPTV: " + (prefBool("autostart_iptv", true) ? "включён" : "выключен"));
     }
@@ -760,6 +784,7 @@ public class MainActivity extends Activity {
         inner.setBackgroundResource(R.drawable.tile_min);
         inner.setPadding(dp(12), dp(10), dp(12), dp(10));
 
+        // одинаковая ширина плашек в ряду: ровные отступы, содержимое внутри
         FrameLayout.LayoutParams flp = new FrameLayout.LayoutParams(
                 frameW > 0 ? frameW : dp(200), ViewGroup.LayoutParams.WRAP_CONTENT);
         flp.gravity = Gravity.CENTER;
@@ -773,14 +798,14 @@ public class MainActivity extends Activity {
         TextView label = new TextView(this);
         label.setText(ri.loadLabel(pm));
         label.setTextColor(Color.WHITE);
-        setTextPx(label, 18f);
-        label.setMaxLines(2);
+        setTextPx(label, 17f);
+        label.setMaxLines(1);
+        label.setEllipsize(android.text.TextUtils.TruncateAt.END);
         label.setGravity(Gravity.CENTER_VERTICAL);
         label.setTypeface(Typeface.create("sans-serif-medium", Typeface.NORMAL));
-        label.setMaxWidth(dp(108));
+        label.setMaxWidth(Math.max(dp(70), (frameW > 0 ? frameW : dp(200)) - dp(94)));
         LinearLayout.LayoutParams llp = new LinearLayout.LayoutParams(
                 ViewGroup.LayoutParams.WRAP_CONTENT, dp(52));
-        llp.leftMargin = dp(10);
         inner.addView(label, llp);
 
         final CharSequence pkg = ri.activityInfo.packageName;
@@ -876,11 +901,63 @@ public class MainActivity extends Activity {
     }
 
     // ---------- погода ----------
+    private int lastWeatherTemp = Integer.MIN_VALUE;
+    private String lastWeatherCond = "";
+
+    /** Градиент карточки погоды: холод — синеватый, жара — тёплый, плюс общая прозрачность. */
+    private void applyWeatherAlpha() {
+        try {
+            View card = findViewById(R.id.weatherCard);
+            if (card == null) return;
+
+            int topColor;
+            int bottomColor;
+            int temp = lastWeatherTemp;
+
+            if (temp == Integer.MIN_VALUE) {              // данные ещё не пришли
+                topColor = 0xFF101826;
+                bottomColor = 0xFF0B1220;
+            } else if (temp <= -10) {                     // сильный мороз
+                topColor = 0xFF8FB4E8;
+                bottomColor = 0xFF5B7FC0;
+            } else if (temp <= 0) {                       // мороз
+                topColor = 0xFF9CC0EA;
+                bottomColor = 0xFF6C90C8;
+            } else if (temp <= 10) {                      // прохладно
+                topColor = 0xFF9CC6DB;
+                bottomColor = 0xFF6E9BB5;
+            } else if (temp <= 20) {                      // тепло
+                topColor = 0xFFA9D6C4;
+                bottomColor = 0xFF77B49E;
+            } else if (temp <= 28) {                      // жарко
+                topColor = 0xFFF0CE9A;
+                bottomColor = 0xFFD6A85E;
+            } else {                                      // очень жарко
+                topColor = 0xFFF2B08A;
+                bottomColor = 0xFFD98A5A;
+            }
+
+            android.graphics.drawable.GradientDrawable g =
+                    new android.graphics.drawable.GradientDrawable(
+                            android.graphics.drawable.GradientDrawable.Orientation.TL_BR,
+                            new int[]{topColor, bottomColor});
+            g.setCornerRadius(dp(26));
+            g.setStroke(dp(1), 0x4DFFFFFF);
+
+            int transp = Math.max(0, Math.min(90, prefInt("weather_alpha", 50)));
+            g.setAlpha(255 - (255 * transp / 100));
+            card.setBackground(g);
+        } catch (Throwable ignored) { }
+    }
+
     private void loadWeather() {
         tvCond.setText("загрузка…");
         new Weather().load(new Weather.Listener() {
             @Override public void onWeather(String city, int temp, String condition,
                                             String icon, List<Weather.Day> week) {
+                lastWeatherTemp = temp;
+                lastWeatherCond = condition;
+                applyWeatherAlpha();
                 tvTemp.setText(temp + "°");
                 tvCond.setText(condition);
                 if (tvWeatherIcon != null) tvWeatherIcon.setText(icon);
@@ -910,6 +987,8 @@ public class MainActivity extends Activity {
             @Override public void onError(String message) {
                 tvCond.setText("нет данных");
                 tvCity.setText("проверьте сеть");
+                lastWeatherTemp = Integer.MIN_VALUE;
+                applyWeatherAlpha();
             }
         });
     }
