@@ -88,6 +88,7 @@ public class MainActivity extends Activity {
                         | View.SYSTEM_UI_FLAG_FULLSCREEN
                         | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
                         | View.SYSTEM_UI_FLAG_LAYOUT_STABLE);
+        setVolumeControlStream(android.media.AudioManager.STREAM_MUSIC);
         applyDisplayScale();
         setContentView(R.layout.activity_main);
 
@@ -178,7 +179,7 @@ public class MainActivity extends Activity {
     }
 
     @Override public boolean onKeyLongPress(int code, KeyEvent e) {
-        if (code == KeyEvent.KEYCODE_MENU) { openAppearanceSettings(); return true; }
+        if (code == KeyEvent.KEYCODE_MENU) { loadWeather(); return true; }   // долгое MENU — обновить погоду
         return super.onKeyLongPress(code, e);
     }
 
@@ -190,11 +191,18 @@ public class MainActivity extends Activity {
             }
         }
         if (code == KeyEvent.KEYCODE_MENU) {
-            if (e.getRepeatCount() == 0) {
-                e.startTracking();
-                return true;   // короткое нажатие — погода, долгое — настройки вида
-            }
+            openAppearanceSettings();       // короткое MENU — настройки вида
             return true;
+        }
+        // цифры 1–5: запуск закреплённых приложений
+        if (code >= KeyEvent.KEYCODE_1 && code <= KeyEvent.KEYCODE_5) {
+            int idx = code - KeyEvent.KEYCODE_1;
+            String[] quick = {"com.slimiptv.player", "ru.rt.video.app.tv", "tv.limehd.stb",
+                    "ru.vk.store.tv", "com.android.tv.settings"};
+            if (idx < quick.length) {
+                android.content.Intent qi = getPackageManager().getLaunchIntentForPackage(quick[idx]);
+                if (qi != null) { qi.addFlags(android.content.Intent.FLAG_ACTIVITY_NEW_TASK); startActivity(qi); return true; }
+            }
         }
         return super.onKeyDown(code, e);
     }
@@ -433,6 +441,24 @@ public class MainActivity extends Activity {
 
     private void buildAllApps() {
         allAppsGrid.removeAllViews();
+
+        // первая строка панели — вход в настройки вида (пульт: OK на «Все приложения» → OK на строке)
+        TextView settingsEntry = new TextView(this);
+        settingsEntry.setText("Вид главного экрана");
+        settingsEntry.setTextColor(0xE6FFFFFF);
+        settingsEntry.setTextSize(17);
+        settingsEntry.setPadding(dp(20), dp(14), dp(20), dp(14));
+        settingsEntry.setBackgroundResource(R.drawable.pill_bg);
+        settingsEntry.setFocusable(true);
+        settingsEntry.setClickable(true);
+        settingsEntry.setOnClickListener(v -> {
+            closeAllApps();
+            openAppearanceSettings();
+        });
+        LinearLayout.LayoutParams sep = new LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        sep.bottomMargin = dp(18);
+        allAppsGrid.addView(settingsEntry, sep);
         PackageManager pm = getPackageManager();
         final List<String> hidden = new ArrayList<>();
         if (!prefBool("show_play_store", false)) hidden.add("com.android.vending");   // Play Store — по настройке
