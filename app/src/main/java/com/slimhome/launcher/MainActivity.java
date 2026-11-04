@@ -63,6 +63,7 @@ public class MainActivity extends Activity {
     private boolean panelOpen;
     private ViewGroup rootView;
     private FaceView winkFace;
+    private int forcedMood = -1;
 
     private boolean useA = true;
     private int lastAmbient = 0;
@@ -200,8 +201,8 @@ public class MainActivity extends Activity {
         // цифры 1–5: запуск закреплённых приложений
         if (code >= KeyEvent.KEYCODE_1 && code <= KeyEvent.KEYCODE_5) {
             int idx = code - KeyEvent.KEYCODE_1;
-            String[] quick = {"com.slimiptv.player", "com.google.android.youtube.tv", "ru.rt.video.app.tv",
-                    "tv.limehd.stb", "ru.vk.store.tv"};
+            String[] quick = {"com.slimiptv.player", "ru.rt.video.app.tv", "tv.limehd.stb",
+                    "ru.vk.store.tv", "com.slimvpn.app"};
             if (idx < quick.length) {
                 android.content.Intent qi = getPackageManager().getLaunchIntentForPackage(quick[idx]);
                 if (qi != null) { qi.addFlags(android.content.Intent.FLAG_ACTIVITY_NEW_TASK); startActivity(qi); return true; }
@@ -562,22 +563,34 @@ public class MainActivity extends Activity {
         }
 
         final FaceView face = new FaceView(this);
+        // каждый раз — случайное настроение из доступных
+        int mood = forcedMood >= 0 ? forcedMood : new java.util.Random().nextInt(FaceView.MOOD_COUNT);
+        face.setMood(mood);
+
         FrameLayout.LayoutParams lp = new FrameLayout.LayoutParams(dp(96), dp(96));
         lp.gravity = Gravity.BOTTOM | Gravity.END;
         lp.setMargins(0, 0, dp(48), dp(30));
         face.setAlpha(0f);
         face.setScaleX(0.5f);
         face.setScaleY(0.5f);
+        face.setRotation(mood % 2 == 0 ? -8f : 8f);
         rootView.addView(face, lp);
         winkFace = face;
 
-        face.animate().alpha(1f).scaleX(1.15f).scaleY(1.15f).setDuration(180).start();
+        face.animate().alpha(1f).scaleX(1.15f).scaleY(1.15f).rotation(0f)
+                .setDuration(200).start();
 
+        // через мгновение — «оживает»: подмигивает или меняет выражение
         face.postDelayed(() -> {
             if (face.getParent() == null) return;
-            face.setWinking(true);
+            if (mood == FaceView.SMILE || mood == FaceView.LAUGH) {
+                face.setWinking(true);          // подмигнуть
+            } else {
+                int next = new java.util.Random().nextInt(FaceView.MOOD_COUNT);
+                face.setMood(next);
+            }
             face.animate().scaleX(1f).scaleY(1f).setDuration(180).start();
-        }, 650);
+        }, 700);
 
 
     }
@@ -637,14 +650,15 @@ public class MainActivity extends Activity {
                 }
             }
         } catch (Throwable ignored) { }
-        tvVpn.setText(on ? "VPN · вкл" : "VPN · выкл");
+        tvVpn.setText(on ? "SlimVPN · вкл" : "SlimVPN · выкл");
         tvVpn.setTextColor(on ? Color.parseColor("#FF39D98A") : Color.parseColor("#FFFF6B6B"));
     }
 
     /** Клик по кнопке VPN: включает установленный VPN-клиент или открывает настройки VPN. */
     private void openVpn() {
-        String[] vpnApps = {"com.wireguard.android", "org.amnezia.vpn", "com.v2ray.ang",
-                "free.vpn.unblock.proxy.vpn.master.pro", "com.psiphon3"};
+        // отдельная кнопка SlimVPN: запускаем наш клиент (он сам поднимет туннель и откроет YouTube)
+        String[] vpnApps = {"com.slimvpn.app", "com.wireguard.android", "org.amnezia.vpn",
+                "com.v2ray.ang", "com.psiphon3"};
         for (String pkg : vpnApps) {
             android.content.Intent i = getPackageManager().getLaunchIntentForPackage(pkg);
             if (i != null) {
@@ -699,7 +713,9 @@ public class MainActivity extends Activity {
                 "com.droidlogic.miracast",   // Miracast
                 "com.droidlogic.appinstall",  // AppInstaller
                 "io.github.sumyabazar1.weather", // погода уже есть карточкой
-                "com.android.gallery3d"     // галерея
+                  "com.android.gallery3d",    // галерея
+                  "com.google.android.youtube.tv", // YouTube запускается кнопкой SlimVPN
+                  "com.slimvpn.app"           // SlimVPN — отдельной кнопкой в панели
         ));
 
         Intent main = new Intent(Intent.ACTION_MAIN).addCategory(Intent.CATEGORY_LAUNCHER);
@@ -711,7 +727,6 @@ public class MainActivity extends Activity {
         // закреплённые приложения идут первыми, дальше — по алфавиту
         final List<String> pinned = java.util.Arrays.asList(
                 "com.slimiptv.player",     // SlimIPTV — первым на главном экране
-                "com.google.android.youtube.tv", // официальный YouTube для ТВ
                 "ru.rt.video.app.tv",      // Wink
                 "tv.limehd.stb",           // Лайм HD
                 "ru.vk.store.tv",          // RuStore

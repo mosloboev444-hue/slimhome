@@ -8,70 +8,192 @@ import android.graphics.Path;
 import android.graphics.RectF;
 import android.view.View;
 
-/** Нарисованный смайлик: не зависит от шрифтов эмодзи, которых нет на всех ТВ. */
+/**
+ * Drawn emoticon: several moods, no dependency on emoji fonts (TV ROMs often lack them).
+ */
 public class FaceView extends View {
+
+    public static final int MOOD_COUNT = 8;
+
+    public static final int SMILE = 0;
+    public static final int WINK = 1;
+    public static final int LAUGH = 2;
+    public static final int SURPRISED = 3;
+    public static final int SLEEPY = 4;
+    public static final int LOVE = 5;
+    public static final int TONGUE = 6;
+    public static final int ROBOT = 7;
 
     private final Paint facePaint = new Paint(Paint.ANTI_ALIAS_FLAG);
     private final Paint inkPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
     private final Paint blushPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
-    private final Path mouth = new Path();
-    private final RectF mouthRect = new RectF();
+    private final Path path = new Path();
+    private final RectF rect = new RectF();
+
+    private int mood = SMILE;
     private boolean winking;
 
-    public FaceView(Context c) {
-        super(c);
-        facePaint.setColor(Color.parseColor("#FFE07A"));
-        inkPaint.setColor(Color.parseColor("#3A2A10"));
-        inkPaint.setStyle(Paint.Style.FILL);
+    public FaceView(Context context) {
+        super(context);
+        facePaint.setColor(Color.parseColor("#FFFFD866"));
+        inkPaint.setColor(Color.parseColor("#FF2A1F0E"));
+        inkPaint.setStyle(Paint.Style.STROKE);
+        inkPaint.setStrokeWidth(3f);
         inkPaint.setStrokeCap(Paint.Cap.ROUND);
-        blushPaint.setColor(Color.parseColor("#33E86A5A"));
-        setLayerType(LAYER_TYPE_SOFTWARE, null);
+        blushPaint.setColor(0x33FF8A65);
     }
 
-    public void setWinking(boolean value) {
-        if (winking == value) return;
-        winking = value;
+    public void setMood(int mood) {
+        this.mood = ((mood % MOOD_COUNT) + MOOD_COUNT) % MOOD_COUNT;
+        this.winking = this.mood == WINK;
         invalidate();
     }
 
-    @Override protected void onDraw(Canvas canvas) {
-        super.onDraw(canvas);
+    public int getMood() { return mood; }
+
+    public void setWinking(boolean winking) {
+        this.winking = winking;
+        if (winking) this.mood = WINK;
+        invalidate();
+    }
+
+    @Override protected void onDraw(Canvas c) {
         float w = getWidth(), h = getHeight();
+        float r = Math.min(w, h) / 2f - 4f;
         float cx = w / 2f, cy = h / 2f;
-        float r = Math.min(w, h) / 2f - Math.max(w, h) * 0.04f;
 
-        facePaint.setShadowLayer(r * 0.10f, 0, r * 0.05f, 0x66000000);
-        canvas.drawCircle(cx, cy, r, facePaint);
-        facePaint.clearShadowLayer();
+        c.save();
+        c.rotate(mood == ROBOT ? 0f : (mood % 2 == 0 ? -6f : 6f), cx, cy);
 
-        float eyeDy = -r * 0.16f;
-        float eyeDx = r * 0.34f;
-        float eyeR = r * 0.105f;
+        // face
+        c.drawCircle(cx, cy, r, facePaint);
 
-        canvas.drawCircle(cx - eyeDx, cy + eyeDy, eyeR, inkPaint);
-        if (winking) {
-            inkPaint.setStyle(Paint.Style.STROKE);
-            inkPaint.setStrokeWidth(r * 0.075f);
-            RectF eyeArc = new RectF(cx + eyeDx - eyeR * 1.4f, cy + eyeDy - eyeR * 1.1f,
-                    cx + eyeDx + eyeR * 1.4f, cy + eyeDy + eyeR * 1.1f);
-            canvas.drawArc(eyeArc, 200, 140, false, inkPaint);
-            inkPaint.setStyle(Paint.Style.FILL);
-        } else {
-            canvas.drawCircle(cx + eyeDx, cy + eyeDy, eyeR, inkPaint);
+        float eyeDx = r * 0.38f;
+        float eyeY = cy - r * 0.18f;
+        float eyeR = r * 0.10f;
+        float stroke = Math.max(3f, r * 0.09f);
+        inkPaint.setStrokeWidth(stroke);
+
+        // eyes
+        switch (mood) {
+
+            case SLEEPY: {
+                c.drawLine(cx - eyeDx - eyeR, eyeY, cx - eyeDx + eyeR, eyeY, inkPaint);
+                c.drawLine(cx + eyeDx - eyeR, eyeY, cx + eyeDx + eyeR, eyeY, inkPaint);
+                break;
+            }
+            case LOVE: {
+                drawHeart(c, cx - eyeDx, eyeY, eyeR * 1.5f, 0xFFFF4D6D);
+                drawHeart(c, cx + eyeDx, eyeY, eyeR * 1.5f, 0xFFFF4D6D);
+                break;
+            }
+            case WINK: {
+                c.drawCircle(cx - eyeDx, eyeY, eyeR, inkPaint);
+                c.drawLine(cx + eyeDx - eyeR * 1.2f, eyeY, cx + eyeDx + eyeR * 1.2f, eyeY, inkPaint);
+                break;
+            }
+            case SURPRISED: {
+                c.drawCircle(cx - eyeDx, eyeY - eyeR * 0.2f, eyeR * 1.25f, inkPaint);
+                c.drawCircle(cx + eyeDx, eyeY - eyeR * 0.2f, eyeR * 1.25f, inkPaint);
+                break;
+            }
+            case ROBOT: {
+                Paint p = new Paint(Paint.ANTI_ALIAS_FLAG);
+                p.setColor(Color.parseColor("#FF20303F"));
+                c.drawCircle(cx - eyeDx, eyeY, eyeR * 1.1f, p);
+                c.drawCircle(cx + eyeDx, eyeY, eyeR * 1.1f, p);
+                p.setColor(0xFF66E0FF);
+                c.drawCircle(cx - eyeDx + eyeR * 0.35f, eyeY - eyeR * 0.35f, eyeR * 0.35f, p);
+                c.drawCircle(cx + eyeDx + eyeR * 0.35f, eyeY - eyeR * 0.35f, eyeR * 0.35f, p);
+                break;
+            }
+            default: {
+                c.drawCircle(cx - eyeDx, eyeY, eyeR, inkPaint);
+                c.drawCircle(cx + eyeDx, eyeY, eyeR, inkPaint);
+            }
         }
 
-        canvas.drawCircle(cx - r * 0.55f, cy + r * 0.18f, r * 0.13f, blushPaint);
-        canvas.drawCircle(cx + r * 0.55f, cy + r * 0.18f, r * 0.13f, blushPaint);
+        // mouth
+        float mY = cy + r * 0.28f;
+        switch (mood) {
+            case LAUGH: {
+                rect.set(cx - r * 0.34f, mY - r * 0.18f, cx + r * 0.34f, mY + r * 0.34f);
+                Paint p = new Paint(Paint.ANTI_ALIAS_FLAG);
+                p.setColor(Color.parseColor("#FF2A1F0E"));
+                c.drawArc(rect, 0, 180, true, p);
+                break;
+            }
+            case SURPRISED: {
+                c.drawCircle(cx, mY, r * 0.13f, inkPaint);
+                break;
+            }
 
-        mouth.reset();
-        mouthRect.set(cx - r * 0.45f, cy + r * 0.02f, cx + r * 0.45f, cy + r * 0.55f);
-        if (winking) {
-            mouthRect.set(cx - r * 0.52f, cy + r * 0.0f, cx + r * 0.52f, cy + r * 0.62f);
+            case SLEEPY: {
+                c.drawLine(cx - r * 0.18f, mY, cx + r * 0.18f, mY, inkPaint);
+                break;
+            }
+            case TONGUE: {
+                path.reset();
+                path.moveTo(cx - r * 0.28f, mY - r * 0.05f);
+                path.quadTo(cx, mY + r * 0.34f, cx + r * 0.28f, mY - r * 0.05f);
+                c.drawPath(path, inkPaint);
+                Paint p = new Paint(Paint.ANTI_ALIAS_FLAG);
+                p.setColor(Color.parseColor("#FFFF6B6B"));
+                rect.set(cx - r * 0.12f, mY + r * 0.10f, cx + r * 0.12f, mY + r * 0.40f);
+                c.drawOval(rect, p);
+                break;
+            }
+            case ROBOT: {
+                rect.set(cx - r * 0.26f, mY - r * 0.08f, cx + r * 0.26f, mY + r * 0.14f);
+                Paint p = new Paint(Paint.ANTI_ALIAS_FLAG);
+                p.setColor(Color.parseColor("#FF20303F"));
+                c.drawRoundRect(rect, r * 0.06f, r * 0.06f, p);
+                break;
+            }
+            case LOVE: {
+                path.reset();
+                path.moveTo(cx - r * 0.26f, mY - r * 0.04f);
+                path.quadTo(cx, mY + r * 0.34f, cx + r * 0.26f, mY - r * 0.04f);
+                c.drawPath(path, inkPaint);
+                break;
+            }
+
+            default: {
+                path.reset();
+                path.moveTo(cx - r * 0.28f, mY - r * 0.06f);
+                path.quadTo(cx, mY + r * 0.30f, cx + r * 0.28f, mY - r * 0.06f);
+                c.drawPath(path, inkPaint);
+            }
         }
-        mouth.addArc(mouthRect, 15, 150);
-        inkPaint.setStyle(Paint.Style.STROKE);
-        inkPaint.setStrokeWidth(r * 0.085f);
-        canvas.drawPath(mouth, inkPaint);
-        inkPaint.setStyle(Paint.Style.FILL);
+
+        // blush
+        if (mood == SMILE || mood == LAUGH || mood == LOVE || mood == TONGUE) {
+            c.drawCircle(cx - r * 0.55f, cy + r * 0.18f, r * 0.14f, blushPaint);
+            c.drawCircle(cx + r * 0.55f, cy + r * 0.18f, r * 0.14f, blushPaint);
+        }
+
+        // antenna for robot
+        if (mood == ROBOT) {
+            Paint p = new Paint(Paint.ANTI_ALIAS_FLAG);
+            p.setColor(Color.parseColor("#FF20303F"));
+            p.setStrokeWidth(stroke);
+            c.drawLine(cx, cy - r, cx, cy - r * 1.28f, p);
+            p.setStyle(Paint.Style.FILL);
+            p.setColor(0xFF66E0FF);
+            c.drawCircle(cx, cy - r * 1.34f, r * 0.09f, p);
+        }
+
+        c.restore();
+    }
+
+    private void drawHeart(Canvas c, float cx, float cy, float size, int color) {
+        Paint p = new Paint(Paint.ANTI_ALIAS_FLAG);
+        p.setColor(color);
+        Path heart = new Path();
+        float s = size;
+        heart.moveTo(cx, cy + s * 0.6f);
+        heart.cubicTo(cx - s * 1.4f, cy - s * 0.4f, cx - s * 0.5f, cy - s * 1.1f, cx, cy - s * 0.3f);
+        heart.cubicTo(cx + s * 0.5f, cy - s * 1.1f, cx + s * 1.4f, cy - s * 0.4f, cx, cy + s * 0.6f);
+        c.drawPath(heart, p);
     }
 }
