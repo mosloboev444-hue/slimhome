@@ -131,10 +131,20 @@ public class FireRingView extends View {
         float cx = getWidth() / 2f;
         float cy = getHeight() / 2f;
 
+        matrix.reset();
+        matrix.setRotate(rotate, cx, cy);
+        gradient.setLocalMatrix(matrix);
+
         c.save();
         c.scale(pulse, pulse, cx, cy);
-        c.rotate(rotate, cx, cy);
-        if (ringBitmap != null) c.drawBitmap(ringBitmap, 0, 0, null);
+
+        float r = Math.min(oval.width(), oval.height()) * 0.5f;
+        float rr = Math.max(0f, Math.min(radiusDp * getResources().getDisplayMetrics().density, r));
+
+        c.drawRoundRect(oval, rr, rr, glow);   // свечение
+        c.drawRoundRect(oval, rr, rr, ring);   // пламя
+        c.drawRoundRect(oval, rr, rr, core);   // яркий контур
+
         c.restore();
     }
 }
