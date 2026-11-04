@@ -4,6 +4,7 @@
 [![APK](https://img.shields.io/badge/APK-35%20KB-0aa1dd)](https://github.com/mosloboev444-hue/slimhome/releases/latest)
 [![Android TV](https://img.shields.io/badge/Android%20TV-8.0%2B-3ddc84)](https://developer.android.com/tv)
 [![No Ads](https://img.shields.io/badge/ads-none-critical)](https://github.com/mosloboev444-hue/slimhome)
+[![Pages](https://img.shields.io/badge/%D1%81%D0%B0%D0%B9%D1%82-online-6ed6ff)](https://mosloboev444-hue.github.io/slimhome/)
 
 Лёгкий лаунчер для ТВ-приставок: сетка приложений, погода по геолокации, подсветка фона под цвет иконки,
 кнопки быстрого доступа и своя заставка при загрузке. Написан на Java без сторонних библиотек — **35 КБ APK**,
@@ -13,7 +14,7 @@
 
 ## Скачать
 
-**[SlimHome-1.0.apk](https://github.com/mosloboev444-hue/slimhome/releases/download/v1.0/SlimHome-1.0.apk)** · Android TV 8.0+ · ARM
+**[SlimHome-1.0.apk](https://github.com/mosloboev444-hue/slimhome/releases/download/v1.0/SlimHome-1.0.apk)** · Android TV 8.0+ · ARM · [сайт проекта](https://mosloboev444-hue.github.io/slimhome/)
 
 ```bash
 adb install -r SlimHome-1.0.apk
@@ -78,4 +79,6 @@ store/                — тексты и ассеты для публикаци
 
 ## Лицензия
 
-MIT — см. [LICENSE](LICENSE). Автор дизайна и кода: **Andrey Masloboev**.
+MIT — см. [LICENSE](LICENSE). Политика конфиденциальности — [docs/privacy.md](docs/privacy.md).
+
+Автор дизайна и кода: **Andrey Masloboev**.
