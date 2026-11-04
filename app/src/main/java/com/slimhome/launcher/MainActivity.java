@@ -200,8 +200,8 @@ public class MainActivity extends Activity {
         // цифры 1–5: запуск закреплённых приложений
         if (code >= KeyEvent.KEYCODE_1 && code <= KeyEvent.KEYCODE_5) {
             int idx = code - KeyEvent.KEYCODE_1;
-            String[] quick = {"com.slimiptv.player", "ru.rt.video.app.tv", "tv.limehd.stb",
-                    "ru.vk.store.tv", "com.android.tv.settings"};
+            String[] quick = {"com.slimiptv.player", "com.google.android.youtube.tv", "ru.rt.video.app.tv",
+                    "tv.limehd.stb", "ru.vk.store.tv"};
             if (idx < quick.length) {
                 android.content.Intent qi = getPackageManager().getLaunchIntentForPackage(quick[idx]);
                 if (qi != null) { qi.addFlags(android.content.Intent.FLAG_ACTIVITY_NEW_TASK); startActivity(qi); return true; }
@@ -711,6 +711,7 @@ public class MainActivity extends Activity {
         // закреплённые приложения идут первыми, дальше — по алфавиту
         final List<String> pinned = java.util.Arrays.asList(
                 "com.slimiptv.player",     // SlimIPTV — первым на главном экране
+                "com.google.android.youtube.tv", // официальный YouTube для ТВ
                 "ru.rt.video.app.tv",      // Wink
                 "tv.limehd.stb",           // Лайм HD
                 "ru.vk.store.tv",          // RuStore
@@ -767,7 +768,7 @@ public class MainActivity extends Activity {
         for (int r = 1; r <= 3 && perRow == 0; r++) {
             int cols = (int) Math.ceil(n / (double) r);
             if (cols < 1) cols = 1;
-            if (cols > 8) continue;
+            if (cols > 5) continue;
             int w = (gridW - gapX * (cols - 1)) / cols;
             int h = (gridH - gapY * (r - 1)) / r;
             if (w >= minTileW && h >= minTileH) {
