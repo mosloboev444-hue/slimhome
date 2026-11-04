@@ -268,6 +268,14 @@ public class MainActivity extends Activity {
             }
         }, "size"));
 
+        card.addView(settingsRow("Фон погоды", new Runnable() {
+            @Override public void run() {
+                prefs().edit().putBoolean("weather_bg", !prefBool("weather_bg", false)).apply();
+                applyWeatherAlpha();
+                refreshSettingsLabels();
+            }
+        }, "wbg"));
+
         card.addView(settingsRow("Прозрачность погоды", new Runnable() {
             @Override public void run() {
                 int cur = prefInt("weather_alpha", 50);
@@ -297,7 +305,7 @@ public class MainActivity extends Activity {
             @Override public void run() {
                 prefs().edit().remove("grid_cols").remove("tile_size")
                         .remove("show_play_store").remove("autostart_iptv")
-                        .remove("weather_alpha").apply();
+                        .remove("weather_alpha").remove("weather_bg").apply();
                 applyWeatherAlpha();
                 refreshSettingsLabels();
                 buildApps();
@@ -370,6 +378,7 @@ public class MainActivity extends Activity {
 
         updateRowText("cols", "Колонок приложений: " + colsText);
         updateRowText("size", "Размер плиток: " + sizeText);
+        updateRowText("wbg", "Фон погоды: " + (prefBool("weather_bg", false) ? "стекло" : "без фона"));
         updateRowText("alpha", "Прозрачность погоды: " + prefInt("weather_alpha", 50) + "%");
         updateRowText("play", "Магазин Play: " + (prefBool("show_play_store", false) ? "показан" : "скрыт"));
         updateRowText("iptv", "Автозапуск IPTV: " + (prefBool("autostart_iptv", true) ? "включён" : "выключен"));
@@ -960,6 +969,13 @@ public class MainActivity extends Activity {
             View card = findViewById(R.id.weatherCard);
             if (card == null) return;
 
+            if (!prefBool("weather_bg", false)) {   // фон выключен — только текст и чипы
+                card.setBackground(null);
+                card.setElevation(0);
+                return;
+            }
+            card.setElevation(dp(6));
+
             int topColor;
             int bottomColor;
             int temp = lastWeatherTemp;
@@ -1031,7 +1047,11 @@ public class MainActivity extends Activity {
                     LinearLayout chip = new LinearLayout(MainActivity.this);
                     chip.setOrientation(LinearLayout.VERTICAL);
                     chip.setGravity(Gravity.CENTER_HORIZONTAL);
-                    chip.setBackgroundResource(R.drawable.chip_bg);
+                    if (prefBool("weather_bg", false)) {
+                        chip.setBackgroundResource(R.drawable.chip_bg);
+                    } else {
+                        chip.setBackgroundColor(0x0DFFFFFF);   // без карточки чипы почти прозрачные
+                    }
                     chip.setPadding(dp(8), dp(6), dp(8), dp(6));
                     LinearLayout.LayoutParams clp = new LinearLayout.LayoutParams(0,
                             ViewGroup.LayoutParams.WRAP_CONTENT, 1f);
