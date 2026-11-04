@@ -59,6 +59,7 @@ public class MainActivity extends Activity {
     private final List<View> icons = new ArrayList<>();
     private View tintA, tintB;
     private TextView tvGreeting, tvAllApps, tvVpn;
+    private FireRingView fireRing;
     private LinearLayout allAppsPanel, allAppsGrid;
     private boolean panelOpen;
     private ViewGroup rootView;
@@ -119,6 +120,7 @@ public class MainActivity extends Activity {
         stylePill(tvAllApps, this::toggleAllApps);
 
         rootView = findViewById(R.id.root);
+        attachFireRing();
         View signature = findViewById(R.id.signature);
         signature.setOnFocusChangeListener((v, has) -> {
             tvAuthor(has);
@@ -680,6 +682,46 @@ public class MainActivity extends Activity {
             i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
             try { startActivity(i); return; } catch (Exception ignored) { }
         }
+    }
+
+    /** Огненное кольцо вокруг кнопки «Хочу Ютубчик» при фокусе. */
+    private void attachFireRing() {
+        if (rootView == null || tvVpn == null) return;
+        fireRing = new FireRingView(this);
+        FrameLayout.LayoutParams lp = new FrameLayout.LayoutParams(dp(120), dp(56));
+        lp.gravity = Gravity.TOP | Gravity.START;
+        rootView.addView(fireRing, lp);
+        fireRing.setVisibility(View.INVISIBLE);
+
+        tvVpn.post(this::syncFireRingBounds);
+
+        tvVpn.setOnFocusChangeListener((v, has) -> {
+            tvVpn.setTextColor(has ? 0xFF101725 : 0xFFFF6B6B);
+            v.animate().scaleX(has ? 1.05f : 1f).scaleY(has ? 1.05f : 1f).setDuration(150).start();
+            v.setElevation(has ? dp(8) : 0);
+            if (has) {
+                syncFireRingBounds();
+                fireRing.startFire();
+            } else {
+                fireRing.stopFire();
+            }
+        });
+    }
+
+    private void syncFireRingBounds() {
+        if (fireRing == null || tvVpn == null || rootView == null) return;
+        int[] pill = new int[2];
+        int[] root = new int[2];
+        tvVpn.getLocationInWindow(pill);
+        rootView.getLocationInWindow(root);
+        int pad = dp(9);
+        FrameLayout.LayoutParams lp = new FrameLayout.LayoutParams(
+                tvVpn.getWidth() + pad * 2, tvVpn.getHeight() + pad * 2);
+        lp.leftMargin = pill[0] - root[0] - pad;
+        lp.topMargin = pill[1] - root[1] - pad;
+        lp.gravity = Gravity.TOP | Gravity.START;
+        fireRing.setLayoutParams(lp);
+        fireRing.setCornerRadius(tvVpn.getHeight() / 2f);
     }
 
     // ---------- сеть ----------
