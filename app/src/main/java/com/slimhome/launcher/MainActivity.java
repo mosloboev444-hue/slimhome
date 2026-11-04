@@ -769,6 +769,39 @@ public class MainActivity extends Activity {
         }, 380);
     }
 
+    // ---------- круглые иконки ----------
+    private final java.util.HashMap<String, android.graphics.Bitmap> iconCache = new java.util.HashMap<>();
+
+    private android.graphics.Bitmap roundIcon(android.graphics.drawable.Drawable src, int size, String key) {
+        String cacheKey = key + "@" + size;
+        android.graphics.Bitmap cached = iconCache.get(cacheKey);
+        if (cached != null) return cached;
+
+        android.graphics.Bitmap square = android.graphics.Bitmap.createBitmap(
+                size, size, android.graphics.Bitmap.Config.ARGB_8888);
+        android.graphics.Canvas sc = new android.graphics.Canvas(square);
+        src.setBounds(0, 0, size, size);
+        src.draw(sc);
+
+        android.graphics.Bitmap round = android.graphics.Bitmap.createBitmap(
+                size, size, android.graphics.Bitmap.Config.ARGB_8888);
+        android.graphics.Canvas rc = new android.graphics.Canvas(round);
+        android.graphics.Paint p = new android.graphics.Paint(android.graphics.Paint.ANTI_ALIAS_FLAG);
+        p.setShader(new android.graphics.BitmapShader(square,
+                android.graphics.Shader.TileMode.CLAMP, android.graphics.Shader.TileMode.CLAMP));
+        float r = size / 2f;
+        rc.drawCircle(r, r, r, p);
+
+        // тонкое стеклянное кольцо, чтобы иконка вписывалась в интерфейс
+        android.graphics.Paint ring = new android.graphics.Paint(android.graphics.Paint.ANTI_ALIAS_FLAG);
+        ring.setStyle(android.graphics.Paint.Style.STROKE);
+        ring.setStrokeWidth(Math.max(1f, size / 52f));
+        ring.setColor(0x59FFFFFF);
+        rc.drawCircle(r, r, r - ring.getStrokeWidth() / 2f, ring);
+
+        iconCache.put(cacheKey, round);
+        return round;
+    }
     private View makeTile(ResolveInfo ri) {
         PackageManager pm = getPackageManager();
 
@@ -792,8 +825,10 @@ public class MainActivity extends Activity {
 
         ImageView icon = new ImageView(this);
         Drawable d = ri.loadIcon(pm);
-        icon.setImageDrawable(d);
-        inner.addView(icon, new LinearLayout.LayoutParams(dp(52), dp(52)));
+        int iconPx = dp(52);
+        icon.setImageBitmap(roundIcon(d, iconPx, ri.activityInfo.packageName));
+        icon.setScaleType(ImageView.ScaleType.FIT_CENTER);
+        inner.addView(icon, new LinearLayout.LayoutParams(iconPx, iconPx));
 
         TextView label = new TextView(this);
         label.setText(ri.loadLabel(pm));
