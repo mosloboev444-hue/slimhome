@@ -118,7 +118,7 @@ public class MainActivity extends Activity {
             if (has) playWink(); else hideFace();
         });
 
-        // подпись автора: переливающийся градиент
+        // РїРѕРґРїРёСЃСЊ Р°РІС‚РѕСЂР°: РїРµСЂРµР»РёРІР°СЋС‰РёР№СЃСЏ РіСЂР°РґРёРµРЅС‚
         startShimmer(findViewById(R.id.tvAuthor));
         startShimmer(findViewById(R.id.tvDesignBy));
 
@@ -130,6 +130,8 @@ public class MainActivity extends Activity {
         updateNetwork();
         buildApps();
         loadWeather();
+
+        maybeAutostartIptv();
     }
 
     @Override protected void onResume() {
@@ -143,12 +145,12 @@ public class MainActivity extends Activity {
         return super.onKeyDown(code, e);
     }
 
-    // ---------- полный список приложений ----------
+    // ---------- РїРѕР»РЅС‹Р№ СЃРїРёСЃРѕРє РїСЂРёР»РѕР¶РµРЅРёР№ ----------
     private static String greeting(int h) {
-        if (h >= 5 && h < 12) return "Доброе утро";
-        if (h >= 12 && h < 17) return "Добрый день";
-        if (h >= 17 && h < 23) return "Добрый вечер";
-        return "Доброй ночи";
+        if (h >= 5 && h < 12) return "Р”РѕР±СЂРѕРµ СѓС‚СЂРѕ";
+        if (h >= 12 && h < 17) return "Р”РѕР±СЂС‹Р№ РґРµРЅСЊ";
+        if (h >= 17 && h < 23) return "Р”РѕР±СЂС‹Р№ РІРµС‡РµСЂ";
+        return "Р”РѕР±СЂРѕР№ РЅРѕС‡Рё";
     }
 
     private void toggleAllApps() {
@@ -238,7 +240,7 @@ public class MainActivity extends Activity {
     }
     private final Handler shimHandler = new Handler(Looper.getMainLooper());
 
-    /** Переливание цветами на Handler: работает даже когда в системе выключены анимации. */
+    /** РџРµСЂРµР»РёРІР°РЅРёРµ С†РІРµС‚Р°РјРё РЅР° Handler: СЂР°Р±РѕС‚Р°РµС‚ РґР°Р¶Рµ РєРѕРіРґР° РІ СЃРёСЃС‚РµРјРµ РІС‹РєР»СЋС‡РµРЅС‹ Р°РЅРёРјР°С†РёРё. */
     private void startShimmer(final TextView v) {
         final int[] palette = {
                 0xFFFFFFFF, 0xFF7FD8FF, 0xFFB48CFF, 0xFFFF9ED2,
@@ -268,7 +270,7 @@ public class MainActivity extends Activity {
         int b = (int) (Color.blue(from) + (Color.blue(to) - Color.blue(from)) * f);
         return Color.argb(a, r, g, b);
     }
-    // ---------- смайлик при наведении на подпись ----------
+    // ---------- СЃРјР°Р№Р»РёРє РїСЂРё РЅР°РІРµРґРµРЅРёРё РЅР° РїРѕРґРїРёСЃСЊ ----------
     private void tvAuthor(boolean focused) {
         TextView a = findViewById(R.id.tvAuthor);
         TextView d = findViewById(R.id.tvDesignBy);
@@ -311,7 +313,7 @@ public class MainActivity extends Activity {
                     if (f.getParent() != null) ((ViewGroup) f.getParent()).removeView(f);
                 }).start();
     }
-    // ---------- оформление кнопок-пилюль ----------
+    // ---------- РѕС„РѕСЂРјР»РµРЅРёРµ РєРЅРѕРїРѕРє-РїРёР»СЋР»СЊ ----------
     private void stylePill(TextView v, Runnable action) {
         v.setFocusable(true);
         v.setFocusableInTouchMode(true);
@@ -340,7 +342,7 @@ public class MainActivity extends Activity {
             try { startActivity(i); return; } catch (Exception ignored) { }
         }
     }
-    // ---------- настройки ----------
+    // ---------- РЅР°СЃС‚СЂРѕР№РєРё ----------
     private void openSettings() {
         Intent[] variants = new Intent[] {
                 new Intent().setClassName("com.android.tv.settings", "com.android.tv.settings.MainSettings"),
@@ -352,18 +354,18 @@ public class MainActivity extends Activity {
         }
     }
 
-    // ---------- сеть ----------
+    // ---------- СЃРµС‚СЊ ----------
     private void updateNetwork() {
         ConnectivityManager cm = (ConnectivityManager) getSystemService(CONNECTIVITY_SERVICE);
         NetworkInfo info = cm != null ? cm.getActiveNetworkInfo() : null;
-        String label = "Нет сети";
+        String label = "РќРµС‚ СЃРµС‚Рё";
         if (info != null && info.isConnected()) {
             label = info.getType() == ConnectivityManager.TYPE_WIFI ? "Wi-Fi" : "Ethernet";
         }
         tvNetwork.setText(label);
     }
 
-    // ---------- приложения ----------
+    // ---------- РїСЂРёР»РѕР¶РµРЅРёСЏ ----------
     private void buildApps() {
         appsGrid.setClipChildren(false);
         appsGrid.setClipToPadding(false);
@@ -372,15 +374,15 @@ public class MainActivity extends Activity {
 
         PackageManager pm = getPackageManager();
 
-        // старые лаунчеры не показываем, но «Настройки» и системные утилиты оставляем
+        // СЃС‚Р°СЂС‹Рµ Р»Р°СѓРЅС‡РµСЂС‹ РЅРµ РїРѕРєР°Р·С‹РІР°РµРј, РЅРѕ В«РќР°СЃС‚СЂРѕР№РєРёВ» Рё СЃРёСЃС‚РµРјРЅС‹Рµ СѓС‚РёР»РёС‚С‹ РѕСЃС‚Р°РІР»СЏРµРј
         final List<String> hidden = java.util.Arrays.asList(
                 "com.gathin.tvhome",
                 "com.oranth.tvlauncher",
                 "com.spocky.projengmenu",
                 "com.droidlogic.miracast",   // Miracast
                 "com.droidlogic.appinstall",  // AppInstaller
-                "io.github.sumyabazar1.weather", // погода уже есть карточкой
-                "com.android.gallery3d"     // галерея
+                "io.github.sumyabazar1.weather", // РїРѕРіРѕРґР° СѓР¶Рµ РµСЃС‚СЊ РєР°СЂС‚РѕС‡РєРѕР№
+                "com.android.gallery3d"     // РіР°Р»РµСЂРµСЏ
         );
 
         Intent main = new Intent(Intent.ACTION_MAIN).addCategory(Intent.CATEGORY_LAUNCHER);
@@ -389,12 +391,13 @@ public class MainActivity extends Activity {
         found.addAll(pm.queryIntentActivities(main, 0));
         found.addAll(pm.queryIntentActivities(lean, 0));
 
-        // закреплённые приложения идут первыми, дальше — по алфавиту
+        // Р·Р°РєСЂРµРїР»С‘РЅРЅС‹Рµ РїСЂРёР»РѕР¶РµРЅРёСЏ РёРґСѓС‚ РїРµСЂРІС‹РјРё, РґР°Р»СЊС€Рµ вЂ” РїРѕ Р°Р»С„Р°РІРёС‚Сѓ
         final List<String> pinned = java.util.Arrays.asList(
+                "com.slimiptv.player",    // SlimIPTV вЂ” РїРµСЂРІС‹Рј РЅР° РіР»Р°РІРЅРѕРј СЌРєСЂР°РЅРµ
                 "ru.rt.video.app.tv",      // Wink
-                "tv.limehd.stb",           // Лайм HD
+                "tv.limehd.stb",           // Р›Р°Р№Рј HD
                 "ru.vk.store.tv",          // RuStore
-                "io.github.sumyabazar1.weather" // погода
+                "io.github.sumyabazar1.weather" // РїРѕРіРѕРґР°
         );
 
         List<ResolveInfo> list = new ArrayList<>();
@@ -439,7 +442,7 @@ public class MainActivity extends Activity {
                 row.addView(tile, tlp);
                 tiles.add(tile);
             }
-            // пустые ячейки, чтобы ряд не растягивал плитки
+            // РїСѓСЃС‚С‹Рµ СЏС‡РµР№РєРё, С‡С‚РѕР±С‹ СЂСЏРґ РЅРµ СЂР°СЃС‚СЏРіРёРІР°Р» РїР»РёС‚РєРё
             for (int k = row.getChildCount(); k < perRow; k++) {
                 View spacer = new View(this);
                 LinearLayout.LayoutParams slp = new LinearLayout.LayoutParams(0, 1, 1f);
@@ -449,7 +452,7 @@ public class MainActivity extends Activity {
             appsGrid.addView(row);
         }
 
-        // появление плиток с задержкой
+        // РїРѕСЏРІР»РµРЅРёРµ РїР»РёС‚РѕРє СЃ Р·Р°РґРµСЂР¶РєРѕР№
         for (int n = 0; n < tiles.size(); n++) {
             View tv = tiles.get(n);
             tv.setAlpha(0f);
@@ -474,7 +477,7 @@ public class MainActivity extends Activity {
         box.setFocusableInTouchMode(true);
         box.setClickable(true);
 
-        // рамка ровно по логотипу и названию, внутри своей ячейки
+        // СЂР°РјРєР° СЂРѕРІРЅРѕ РїРѕ Р»РѕРіРѕС‚РёРїСѓ Рё РЅР°Р·РІР°РЅРёСЋ, РІРЅСѓС‚СЂРё СЃРІРѕРµР№ СЏС‡РµР№РєРё
         LinearLayout inner = new LinearLayout(this);
         inner.setOrientation(LinearLayout.HORIZONTAL);
         inner.setGravity(Gravity.CENTER_VERTICAL);
@@ -528,7 +531,7 @@ public class MainActivity extends Activity {
         return box;
     }
 
-    // ---------- подсветка фона цветом приложения ----------
+    // ---------- РїРѕРґСЃРІРµС‚РєР° С„РѕРЅР° С†РІРµС‚РѕРј РїСЂРёР»РѕР¶РµРЅРёСЏ ----------
     private void setAmbientColor(int color) {
         if (color == lastAmbient) return;
         lastAmbient = color;
@@ -556,7 +559,7 @@ public class MainActivity extends Activity {
         return Color.argb(alpha, Color.red(color), Color.green(color), Color.blue(color));
     }
 
-    /** Средний цвет иконки, подтянутый по насыщенности. */
+    /** РЎСЂРµРґРЅРёР№ С†РІРµС‚ РёРєРѕРЅРєРё, РїРѕРґС‚СЏРЅСѓС‚С‹Р№ РїРѕ РЅР°СЃС‹С‰РµРЅРЅРѕСЃС‚Рё. */
     private int dominantColor(Drawable drawable) {
         try {
             int size = 40;
@@ -575,7 +578,7 @@ public class MainActivity extends Activity {
                     int a = Color.alpha(p);
                     if (a < 48) continue;
                     int lum = (Color.red(p) * 299 + Color.green(p) * 587 + Color.blue(p) * 114) / 1000;
-                    if (lum < 36 || lum > 246) continue; // фон иконки не учитываем
+                    if (lum < 36 || lum > 246) continue; // С„РѕРЅ РёРєРѕРЅРєРё РЅРµ СѓС‡РёС‚С‹РІР°РµРј
                     double k = a / 255.0;
                     r += Color.red(p) * k;
                     g += Color.green(p) * k;
@@ -596,13 +599,13 @@ public class MainActivity extends Activity {
         }
     }
 
-    // ---------- погода ----------
+    // ---------- РїРѕРіРѕРґР° ----------
     private void loadWeather() {
-        tvCond.setText("загрузка…");
+        tvCond.setText("Р·Р°РіСЂСѓР·РєР°вЂ¦");
         new Weather().load(new Weather.Listener() {
             @Override public void onWeather(String city, int temp, String condition,
                                             String icon, List<Weather.Day> week) {
-                tvTemp.setText(temp + "°");
+                tvTemp.setText(temp + "В°");
                 tvCond.setText(icon + "  " + condition);
                 tvCity.setText(city);
                 weekRow.removeAllViews();
@@ -618,16 +621,16 @@ public class MainActivity extends Activity {
 
                     TextView name = smallText(d.name, "#B3FFFFFF", 16);
                     TextView ic = smallText(d.icon, "#FFFFFFFF", 19);
-                    TextView hi = smallText(d.max + "°", "#FFFFFFFF", 16);
-                    TextView lo = smallText(d.min + "°", "#80FFFFFF", 15);
+                    TextView hi = smallText(d.max + "В°", "#FFFFFFFF", 16);
+                    TextView lo = smallText(d.min + "В°", "#80FFFFFF", 15);
                     col.addView(name); col.addView(ic); col.addView(hi); col.addView(lo);
                     weekRow.addView(col);
                 }
             }
 
             @Override public void onError(String message) {
-                tvCond.setText("нет данных");
-                tvCity.setText("проверьте сеть");
+                tvCond.setText("РЅРµС‚ РґР°РЅРЅС‹С…");
+                tvCity.setText("РїСЂРѕРІРµСЂСЊС‚Рµ СЃРµС‚СЊ");
             }
         });
     }
@@ -650,16 +653,36 @@ public class MainActivity extends Activity {
         return getSharedPreferences("slimhome", MODE_PRIVATE);
     }
 
+    /** Один раз после включения приставки открывает IPTV-плеер. */
+    private void maybeAutostartIptv() {
+        try {
+            final android.content.SharedPreferences p = prefs();
+            long bootId = System.currentTimeMillis() - android.os.SystemClock.elapsedRealtime();
+            if (p.getLong("boot_id", 0L) == bootId) return;
+            p.edit().putLong("boot_id", bootId).apply();
+            if (!p.getBoolean("autostart_iptv", true)) return;
+
+            final android.content.Intent iptv = getPackageManager()
+                    .getLaunchIntentForPackage("com.slimiptv.player");
+            if (iptv == null) return;
+
+            new Handler(Looper.getMainLooper()).postDelayed(new Runnable() {
+                @Override public void run() {
+                    try { startActivity(iptv); } catch (Throwable ignored) { }
+                }
+            }, 8000L);
+        } catch (Throwable ignored) { }
+    }
     private int dp(int v) {
         return Math.round(getResources().getDisplayMetrics().density * v * scale);
     }
 
-    /** Короткое интро при холодном старте: частицы, логотип, название. */
+    /** РљРѕСЂРѕС‚РєРѕРµ РёРЅС‚СЂРѕ РїСЂРё С…РѕР»РѕРґРЅРѕРј СЃС‚Р°СЂС‚Рµ: С‡Р°СЃС‚РёС†С‹, Р»РѕРіРѕС‚РёРї, РЅР°Р·РІР°РЅРёРµ. */
     private void playIntro() {
         final android.view.ViewGroup root = findViewById(R.id.root);
         if (root == null) return;
 
-        // не чаще раза в 30 минут: при возврате домой интро не мешает
+        // РЅРµ С‡Р°С‰Рµ СЂР°Р·Р° РІ 30 РјРёРЅСѓС‚: РїСЂРё РІРѕР·РІСЂР°С‚Рµ РґРѕРјРѕР№ РёРЅС‚СЂРѕ РЅРµ РјРµС€Р°РµС‚
         long now = System.currentTimeMillis();
         long last = prefs().getLong("intro_at", 0L);
         if (now - last < 30L * 60L * 1000L) return;
@@ -684,16 +707,16 @@ public class MainActivity extends Activity {
             }
         }, 16);
     }
-    /** Подгоняет отступы, ширину карточки погоды, колонки и размеры текста. */
+    /** РџРѕРґРіРѕРЅСЏРµС‚ РѕС‚СЃС‚СѓРїС‹, С€РёСЂРёРЅСѓ РєР°СЂС‚РѕС‡РєРё РїРѕРіРѕРґС‹, РєРѕР»РѕРЅРєРё Рё СЂР°Р·РјРµСЂС‹ С‚РµРєСЃС‚Р°. */
     private void applyResponsiveSizes() {
         android.util.DisplayMetrics m = getResources().getDisplayMetrics();
         float wDp = m.widthPixels / m.density;
 
-        // сколько плиток в ряд влезает
+        // СЃРєРѕР»СЊРєРѕ РїР»РёС‚РѕРє РІ СЂСЏРґ РІР»РµР·Р°РµС‚
         columns = Math.round(wDp / 256f);
         columns = Math.max(3, Math.min(5, columns));
 
-        // ширина рамки плитки: не шире ячейки
+        // С€РёСЂРёРЅР° СЂР°РјРєРё РїР»РёС‚РєРё: РЅРµ С€РёСЂРµ СЏС‡РµР№РєРё
         float cellDp = (wDp - 112f - 16f * (columns - 1)) / columns;
         frameW = dp((int) Math.min(200f, cellDp - 6f));
 
@@ -705,7 +728,7 @@ public class MainActivity extends Activity {
 
         final View wrap = findViewById(R.id.appsWrap);
         if (wrap != null && card != null) {
-            // подстраиваем отступ сетки каждый раз, когда меняются размеры карточки погоды
+            // РїРѕРґСЃС‚СЂР°РёРІР°РµРј РѕС‚СЃС‚СѓРї СЃРµС‚РєРё РєР°Р¶РґС‹Р№ СЂР°Р·, РєРѕРіРґР° РјРµРЅСЏСЋС‚СЃСЏ СЂР°Р·РјРµСЂС‹ РєР°СЂС‚РѕС‡РєРё РїРѕРіРѕРґС‹
             card.addOnLayoutChangeListener((v, l, t, r, b, ol, ot, or, ob) -> {
                 int top = Math.max(card.getBottom() + dp(18), dp(120));
                 wrap.setPadding(dp(56), top, dp(56), dp(132));
@@ -730,7 +753,7 @@ public class MainActivity extends Activity {
         return Math.round(v * scale);
     }
 
-    /** Подгонка под разрешение экрана: тюльпаны, HD, Full HD, 4K. */
+    /** РџРѕРґРіРѕРЅРєР° РїРѕРґ СЂР°Р·СЂРµС€РµРЅРёРµ СЌРєСЂР°РЅР°: С‚СЋР»СЊРїР°РЅС‹, HD, Full HD, 4K. */
     private void applyDisplayScale() {
         android.util.DisplayMetrics m = getResources().getDisplayMetrics();
         float wDp = m.widthPixels / m.density;
