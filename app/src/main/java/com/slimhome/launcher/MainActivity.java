@@ -131,6 +131,37 @@ public class MainActivity extends Activity {
         buildApps();
         loadWeather();
         maybeAutostartIptv();
+        registerAppsWatcher();
+    }
+
+    private android.content.BroadcastReceiver appsWatcher;
+
+    private void registerAppsWatcher() {
+        if (appsWatcher != null) return;
+        appsWatcher = new android.content.BroadcastReceiver() {
+            @Override public void onReceive(android.content.Context c, Intent i) {
+                if (i == null) return;
+                ui.removeCallbacks(rebuildGrid);
+                ui.postDelayed(rebuildGrid, 1200);
+            }
+        };
+        android.content.IntentFilter f = new android.content.IntentFilter();
+        f.addAction(Intent.ACTION_PACKAGE_ADDED);
+        f.addAction(Intent.ACTION_PACKAGE_REMOVED);
+        f.addAction(Intent.ACTION_PACKAGE_CHANGED);
+        f.addAction(Intent.ACTION_PACKAGE_REPLACED);
+        f.addDataScheme("package");
+        registerReceiver(appsWatcher, f);
+    }
+
+    private final Runnable rebuildGrid = new Runnable() {
+        @Override public void run() {
+            if (!isFinishing()) buildApps();
+        }
+    };
+    @Override protected void onDestroy() {
+        try { if (appsWatcher != null) unregisterReceiver(appsWatcher); } catch (Throwable ignored) { }
+        super.onDestroy();
     }
 
     @Override protected void onResume() {
@@ -172,11 +203,6 @@ public class MainActivity extends Activity {
         allAppsPanel.animate().alpha(0f).setDuration(140)
                 .withEndAction(() -> allAppsPanel.setVisibility(View.GONE)).start();
         if (!tiles.isEmpty()) tiles.get(0).requestFocus();
-    }
-
-    @Override protected void onDestroy() {
-        shimHandler.removeCallbacksAndMessages(null);
-        super.onDestroy();
     }
 
     @Override public void onBackPressed() {
@@ -423,51 +449,104 @@ public class MainActivity extends Activity {
             }
         });
 
-        int perRow = columns;
-        int max = perRow * ROWS;
-        for (int i = 0; i < Math.min(list.size(), max); i += perRow) {
+        // ---- адаптивная сетка: подбираем строки/колонки так, чтобы все плитки влезли ----
+        final int gapX = dp(16);
+        final int gapY = dp(14);
+        final int minTileW = dp(132);
+        final int minTileH = dp(96);
+        final int n = list.size();
+
+        gridWasEstimated = appsGrid.getWidth() <= 0 || appsGrid.getHeight() <= 0;
+        int gridW = appsGrid.getWidth();
+        int gridH = appsGrid.getHeight();
+        if (gridW <= 0 || gridH <= 0) {
+            android.util.DisplayMetrics dm = getResources().getDisplayMetrics();
+            if (gridW <= 0) gridW = dm.widthPixels - dp(112);
+            if (gridH <= 0) gridH = dm.heightPixels - dp(452);
+        }
+
+        int perRow = 0;
+        int tileH = dp(160);
+        for (int r = 1; r <= 3; r++) {
+            int cols = (int) Math.ceil(n / (double) r);
+            if (cols < 1) cols = 1;
+            if (cols > 8) continue;
+            int w = (gridW - gapX * (cols - 1)) / cols;
+            int h = (gridH - gapY * (r - 1)) / r;
+            if (w >= minTileW && h >= minTileH) {
+                perRow = cols;
+                tileH = h;
+                break;
+            }
+        }
+        if (perRow == 0) {
+            // не влезает «красиво» — ужимаем: максимум 8 колонок и 3 ряда
+            perRow = Math.min(8, Math.max(1, n));
+            int rowsNeeded = (int) Math.ceil(n / (double) perRow);
+            int rowsUsed = Math.min(3, rowsNeeded);
+            tileH = Math.max(dp(72), (gridH - gapY * (rowsUsed - 1)) / rowsUsed);
+        }
+        if (perRow < 1) perRow = 1;
+        if (tileH < dp(72)) tileH = dp(72);
+        int visible = Math.min(n, perRow * 3);   // остальные — в панели «Все приложения»
+
+        int cellW = (gridW - gapX * (perRow - 1)) / perRow;
+        frameW = Math.max(dp(110), Math.min(dp(200), cellW - dp(8)));
+
+        for (int i = 0; i < visible; i += perRow) {
+            int inRow = Math.min(perRow, visible - i);
+
             LinearLayout row = new LinearLayout(this);
             row.setOrientation(LinearLayout.HORIZONTAL);
+            row.setGravity(Gravity.CENTER_HORIZONTAL);
             LinearLayout.LayoutParams rlp = new LinearLayout.LayoutParams(
-                    ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-            if (i > 0) rlp.topMargin = dp(14);
+                    ViewGroup.LayoutParams.MATCH_PARENT, tileH);
+            if (i > 0) rlp.topMargin = gapY;
             row.setLayoutParams(rlp);
             row.setClipChildren(false);
             row.setClipToPadding(false);
 
-            for (int j = i; j < Math.min(i + perRow, Math.min(list.size(), max)); j++) {
+            for (int j = i; j < i + inRow; j++) {
                 ResolveInfo ri = list.get(j);
                 View tile = makeTile(ri);
-                LinearLayout.LayoutParams tlp = new LinearLayout.LayoutParams(0, dp(160), 1f);
-                if (j > i) tlp.leftMargin = dp(16);
+                LinearLayout.LayoutParams tlp = new LinearLayout.LayoutParams(0, tileH, 1f);
+                if (j > i) tlp.leftMargin = gapX;
                 row.addView(tile, tlp);
                 tiles.add(tile);
             }
-            // пустые ячейки, чтобы ряд не растягивал плитки
-            for (int k = row.getChildCount(); k < perRow; k++) {
+            for (int k = inRow; k < perRow; k++) {
                 View spacer = new View(this);
                 LinearLayout.LayoutParams slp = new LinearLayout.LayoutParams(0, 1, 1f);
-                if (k > 0) slp.leftMargin = dp(14);
+                if (k > 0) slp.leftMargin = gapX;
                 row.addView(spacer, slp);
             }
             appsGrid.addView(row);
         }
 
         // появление плиток с задержкой
-        for (int n = 0; n < tiles.size(); n++) {
-            View tv = tiles.get(n);
+        for (int idx = 0; idx < tiles.size(); idx++) {
+            View tv = tiles.get(idx);
             tv.setAlpha(0f);
             tv.setScaleX(0.86f);
             tv.setScaleY(0.86f);
             tv.setTranslationY(dp(18));
             tv.animate().alpha(1f).scaleX(1f).scaleY(1f).translationY(0f)
-                    .setStartDelay(45L * n)
+                    .setStartDelay(45L * idx)
                     .setDuration(300L)
                     .setInterpolator(new DecelerateInterpolator())
                     .start();
         }
 
-        if (!tiles.isEmpty()) tiles.get(0).postDelayed(tiles.get(0)::requestFocus, 380);
+        // сетка могла строиться до разметки — пересобираем с реальными размерами
+        appsGrid.postDelayed(new Runnable() {
+            @Override public void run() {
+                if (!tiles.isEmpty()) tiles.get(0).requestFocus();
+                if (appsGrid.getWidth() > 0 && gridWasEstimated) {
+                    gridWasEstimated = false;
+                    buildApps();
+                }
+            }
+        }, 380);
     }
 
     private View makeTile(ResolveInfo ri) {
@@ -648,6 +727,7 @@ public class MainActivity extends Activity {
 
     private float scale = 1f;
     private int columns = 5;
+    private boolean gridWasEstimated = false;
     private int frameW = 0;
 
     /** Один раз после включения приставки открывает IPTV-плеер. */
@@ -655,7 +735,8 @@ public class MainActivity extends Activity {
         try {
             final android.content.SharedPreferences p = prefs();
             long bootId = System.currentTimeMillis() - android.os.SystemClock.elapsedRealtime();
-            if (p.getLong("boot_id", 0L) == bootId) return;
+            long prev = p.getLong("boot_id", 0L);
+            if (prev != 0L && Math.abs(bootId - prev) < 60000L) return;   // уже запускали в этой загрузке
             p.edit().putLong("boot_id", bootId).apply();
             if (!p.getBoolean("autostart_iptv", true)) return;
 
