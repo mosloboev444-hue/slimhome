@@ -33,6 +33,7 @@ public class FireRingView extends View {
     private final RectF oval = new RectF();
     private final Matrix matrix = new Matrix();
     private SweepGradient gradient;
+    private android.graphics.Bitmap ringBitmap;
     private ValueAnimator spinner;
     private float rotate = 0f;
     private float pulse = 1f;
@@ -67,8 +68,23 @@ public class FireRingView extends View {
         if (getWidth() == 0 || getHeight() == 0) return;
         float cx = getWidth() / 2f;
         float cy = getHeight() / 2f;
-        float r = Math.max(cx, cy) * 1.15f;
         gradient = new SweepGradient(cx, cy, FIRE, null);
+        buildBitmap();
+    }
+
+    /** Кольцо рисуется один раз в bitmap — дальше только вращаем картинку (дешево для GPU). */
+    private void buildBitmap() {
+        int w = getWidth(), h = getHeight();
+        if (w <= 0 || h <= 0) return;
+        android.graphics.Bitmap bmp = android.graphics.Bitmap.createBitmap(w, h,
+                android.graphics.Bitmap.Config.ARGB_8888);
+        Canvas c = new Canvas(bmp);
+        float r = Math.min(oval.width(), oval.height()) * 0.5f;
+        float rr = Math.max(0f, Math.min(radiusDp * getResources().getDisplayMetrics().density, r));
+        c.drawRoundRect(oval, rr, rr, glow);
+        c.drawRoundRect(oval, rr, rr, ring);
+        c.drawRoundRect(oval, rr, rr, core);
+        ringBitmap = bmp;
         glow.setShader(gradient);
         ring.setShader(gradient);
         core.setShader(gradient);
@@ -115,25 +131,10 @@ public class FireRingView extends View {
         float cx = getWidth() / 2f;
         float cy = getHeight() / 2f;
 
-        matrix.reset();
-        matrix.setRotate(rotate, cx, cy);
-        if (gradient != null) {
-            gradient.setLocalMatrix(matrix);
-        }
-
         c.save();
         c.scale(pulse, pulse, cx, cy);
-
-        float r = Math.min(oval.width(), oval.height()) * 0.5f;
-        float rr = Math.max(0f, Math.min(radiusDp * getResources().getDisplayMetrics().density, r));
-
-        // свечение
-        c.drawRoundRect(oval, rr, rr, glow);
-        // основное пламя
-        c.drawRoundRect(oval, rr, rr, ring);
-        // тонкий яркий контур
-        c.drawRoundRect(oval, rr, rr, core);
-
+        c.rotate(rotate, cx, cy);
+        if (ringBitmap != null) c.drawBitmap(ringBitmap, 0, 0, null);
         c.restore();
     }
 }

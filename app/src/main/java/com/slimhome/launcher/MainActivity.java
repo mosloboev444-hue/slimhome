@@ -61,6 +61,7 @@ public class MainActivity extends Activity {
     private TextView tvGreeting, tvAllApps, tvVpn;
     private FireRingView fireRing;
     private SparksView sparks;
+    private final java.util.List<android.animation.ValueAnimator> iconAnims = new java.util.ArrayList<>();
     private boolean vpnWasFocused = false;
     private boolean pendingVpnFocus = false;
     private LinearLayout allAppsPanel, allAppsGrid;
@@ -184,8 +185,19 @@ public class MainActivity extends Activity {
         super.onDestroy();
     }
 
+    @Override protected void onPause() {
+        super.onPause();
+        for (android.animation.ValueAnimator a : iconAnims) {
+            if (a.isStarted()) a.pause();
+        }
+        if (fireRing != null) fireRing.stopFire();
+    }
+
     @Override protected void onResume() {
         super.onResume();
+        for (android.animation.ValueAnimator a : iconAnims) {
+            if (a.isPaused()) a.resume();
+        }
         if (tvVpn != null && fireRing != null) {
             pendingVpnFocus = true;
             tvVpn.postDelayed(this::focusVpn, 1600);
@@ -951,6 +963,7 @@ public class MainActivity extends Activity {
         va.setDuration(3600);
         va.setStartDelay(900L + Math.abs(seed % 1400));
         va.setRepeatCount(android.animation.ValueAnimator.INFINITE);
+        iconAnims.add(va);
         va.setInterpolator(new android.view.animation.AccelerateDecelerateInterpolator());
         va.addUpdateListener(a -> icon.setTranslationY((Float) a.getAnimatedValue()));
         va.start();
