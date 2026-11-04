@@ -782,7 +782,7 @@ public class MainActivity extends Activity {
         inner.setOrientation(LinearLayout.HORIZONTAL);
         inner.setGravity(Gravity.CENTER_VERTICAL);
         inner.setBackgroundResource(R.drawable.tile_min);
-        inner.setPadding(dp(12), dp(10), dp(12), dp(10));
+        inner.setPadding(dp(14), dp(10), dp(18), dp(10));
 
         // одинаковая ширина плашек в ряду: ровные отступы, содержимое внутри
         FrameLayout.LayoutParams flp = new FrameLayout.LayoutParams(
@@ -803,9 +803,10 @@ public class MainActivity extends Activity {
         label.setEllipsize(android.text.TextUtils.TruncateAt.END);
         label.setGravity(Gravity.CENTER_VERTICAL);
         label.setTypeface(Typeface.create("sans-serif-medium", Typeface.NORMAL));
-        label.setMaxWidth(Math.max(dp(70), (frameW > 0 ? frameW : dp(200)) - dp(94)));
+        label.setMaxWidth(Math.max(dp(70), (frameW > 0 ? frameW : dp(200)) - dp(104)));
         LinearLayout.LayoutParams llp = new LinearLayout.LayoutParams(
                 ViewGroup.LayoutParams.WRAP_CONTENT, dp(52));
+        llp.leftMargin = dp(16);
         inner.addView(label, llp);
 
         final CharSequence pkg = ri.activityInfo.packageName;
