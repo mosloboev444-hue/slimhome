@@ -188,7 +188,6 @@ public class MainActivity extends Activity {
         allAppsGrid.removeAllViews();
         PackageManager pm = getPackageManager();
         final List<String> hidden = java.util.Arrays.asList(
-                "com.android.tv.settings",    // Настройки — кнопка в верхней панели
                 "com.android.vending",        // Play Store
                 "com.gathin.tvhome", "com.oranth.tvlauncher", "com.spocky.projengmenu",
                 "com.droidlogic.miracast", "com.droidlogic.appinstall",
@@ -377,7 +376,6 @@ public class MainActivity extends Activity {
 
         // старые лаунчеры не показываем, но «Настройки» и системные утилиты оставляем
         final List<String> hidden = java.util.Arrays.asList(
-                "com.android.tv.settings",    // Настройки — кнопка в верхней панели
                 "com.android.vending",        // Play Store
                 "com.gathin.tvhome",
                 "com.oranth.tvlauncher",
