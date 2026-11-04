@@ -650,7 +650,7 @@ public class MainActivity extends Activity {
                 }
             }
         } catch (Throwable ignored) { }
-        tvVpn.setText(on ? "SlimVPN · вкл" : "SlimVPN · выкл");
+        tvVpn.setText("Хочу Ютуб");
         tvVpn.setTextColor(on ? Color.parseColor("#FF39D98A") : Color.parseColor("#FFFF6B6B"));
     }
 
