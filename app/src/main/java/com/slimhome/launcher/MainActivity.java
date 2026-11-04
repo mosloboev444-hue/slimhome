@@ -201,8 +201,8 @@ public class MainActivity extends Activity {
         // цифры 1–5: запуск закреплённых приложений
         if (code >= KeyEvent.KEYCODE_1 && code <= KeyEvent.KEYCODE_5) {
             int idx = code - KeyEvent.KEYCODE_1;
-            String[] quick = {"com.slimiptv.player", "ru.rt.video.app.tv", "tv.limehd.stb",
-                    "ru.vk.store.tv", "com.slimvpn.app"};
+            String[] quick = {"com.slimiptv.player", "com.slimtube.app", "ru.rt.video.app.tv",
+                    "tv.limehd.stb", "ru.vk.store.tv"};
             if (idx < quick.length) {
                 android.content.Intent qi = getPackageManager().getLaunchIntentForPackage(quick[idx]);
                 if (qi != null) { qi.addFlags(android.content.Intent.FLAG_ACTIVITY_NEW_TASK); startActivity(qi); return true; }
@@ -657,7 +657,7 @@ public class MainActivity extends Activity {
     /** Клик по кнопке VPN: включает установленный VPN-клиент или открывает настройки VPN. */
     private void openVpn() {
         // отдельная кнопка SlimVPN: запускаем наш клиент (он сам поднимет туннель и откроет YouTube)
-        String[] vpnApps = {"com.slimvpn.app", "com.wireguard.android", "org.amnezia.vpn",
+        String[] vpnApps = {"com.slimtube.app", "com.slimvpn.app", "com.wireguard.android", "org.amnezia.vpn",
                 "com.v2ray.ang", "com.psiphon3"};
         for (String pkg : vpnApps) {
             android.content.Intent i = getPackageManager().getLaunchIntentForPackage(pkg);
@@ -727,6 +727,7 @@ public class MainActivity extends Activity {
         // закреплённые приложения идут первыми, дальше — по алфавиту
         final List<String> pinned = java.util.Arrays.asList(
                 "com.slimiptv.player",     // SlimIPTV — первым на главном экране
+                "com.slimtube.app",     // YouTube со встроенным VPN
                 "ru.rt.video.app.tv",      // Wink
                 "tv.limehd.stb",           // Лайм HD
                 "ru.vk.store.tv",          // RuStore
