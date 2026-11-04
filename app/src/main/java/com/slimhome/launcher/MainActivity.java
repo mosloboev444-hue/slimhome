@@ -967,36 +967,48 @@ public class MainActivity extends Activity {
             if (temp == Integer.MIN_VALUE) {              // данные ещё не пришли
                 topColor = 0xFF101826;
                 bottomColor = 0xFF0B1220;
-            } else if (temp <= -10) {                     // сильный мороз
-                topColor = 0xFF8FB4E8;
-                bottomColor = 0xFF5B7FC0;
+            } else if (temp <= -10) {                     // сильный мороз — тёмно-синее стекло
+                topColor = 0xFF1B2A44;
+                bottomColor = 0xFF0E1726;
             } else if (temp <= 0) {                       // мороз
-                topColor = 0xFF9CC0EA;
-                bottomColor = 0xFF6C90C8;
+                topColor = 0xFF1D2C46;
+                bottomColor = 0xFF101A29;
             } else if (temp <= 10) {                      // прохладно
-                topColor = 0xFF9CC6DB;
-                bottomColor = 0xFF6E9BB5;
+                topColor = 0xFF1B2C34;
+                bottomColor = 0xFF0F191F;
             } else if (temp <= 20) {                      // тепло
-                topColor = 0xFFA9D6C4;
-                bottomColor = 0xFF77B49E;
+                topColor = 0xFF1A2C26;
+                bottomColor = 0xFF0E1A16;
             } else if (temp <= 28) {                      // жарко
-                topColor = 0xFFF0CE9A;
-                bottomColor = 0xFFD6A85E;
+                topColor = 0xFF2E2616;
+                bottomColor = 0xFF1A150B;
             } else {                                      // очень жарко
-                topColor = 0xFFF2B08A;
-                bottomColor = 0xFFD98A5A;
+                topColor = 0xFF33221A;
+                bottomColor = 0xFF1D130E;
             }
 
-            android.graphics.drawable.GradientDrawable g =
+            android.graphics.drawable.GradientDrawable base =
                     new android.graphics.drawable.GradientDrawable(
                             android.graphics.drawable.GradientDrawable.Orientation.TL_BR,
                             new int[]{topColor, bottomColor});
-            g.setCornerRadius(dp(26));
-            g.setStroke(dp(1), 0x4DFFFFFF);
+            base.setCornerRadius(dp(26));
+            base.setStroke(dp(1), 0x33FFFFFF);
+
+            // тонкий блик сверху — стекло, а не заливка
+            android.graphics.drawable.GradientDrawable shine =
+                    new android.graphics.drawable.GradientDrawable(
+                            android.graphics.drawable.GradientDrawable.Orientation.TOP_BOTTOM,
+                            new int[]{0x14FFFFFF, 0x00FFFFFF});
+            shine.setCornerRadius(dp(26));
+
+            android.graphics.drawable.LayerDrawable layered =
+                    new android.graphics.drawable.LayerDrawable(
+                            new android.graphics.drawable.Drawable[]{base, shine});
+            layered.setLayerInset(1, dp(1), dp(1), dp(1), dp(1));
 
             int transp = Math.max(0, Math.min(90, prefInt("weather_alpha", 50)));
-            g.setAlpha(255 - (255 * transp / 100));
-            card.setBackground(g);
+            layered.setAlpha(255 - (255 * transp / 100));
+            card.setBackground(layered);
         } catch (Throwable ignored) { }
     }
 
